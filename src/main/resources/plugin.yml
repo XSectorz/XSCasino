@@ -1,4 +1,10 @@
 name: XSCasino
 version: '${project.version}'
-main: net.xsapi.panat.xscasino.XSCasino
+main: net.xsapi.panat.xscasino.core.XSCasino
 api-version: 1.20
+depend: [ ProtocolLib ]
+commands:
+  xscasino:
+    description: "Main Command"
+    aliases:
+      - casino

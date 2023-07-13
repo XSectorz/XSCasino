@@ -1,0 +1,120 @@
+
+configuration:
+  title: "&8Lottery"
+  invnetorySize: 54
+
+contents:
+  barrier:
+    Material: "PAPER"
+    customModelData: 10230
+    amount: 1
+    display: "&r"
+    lore: []
+    slots:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+      - 27
+      - 28
+      - 29
+      - 30
+      - 32
+      - 33
+      - 35
+      - 36
+      - 37
+      - 38
+      - 39
+      - 40
+      - 41
+      - 42
+      - 43
+      - 44
+      - 45
+      - 46
+      - 47
+      - 48
+      - 51
+      - 52
+      - 53
+  info_current:
+    Material: "PAPER"
+    customModelData: 10231
+    amount: 1
+    display: "&x&E&7&C&2&4&5รายละเอียดรางวัล"
+    lore:
+      - "&asaa"
+      - "&asee"
+    slots:
+      - 13
+  info_leaderboard:
+    Material: "GOLD_BLOCK"
+    customModelData: 0
+    amount: 1
+    display: "&x&E&7&C&2&4&5ผู้ชนะล่าสุด"
+    lore:
+      - "&asaa"
+      - "&asee"
+    slots:
+      - 28
+  buy_ticket:
+    Material: "MAP"
+    customModelData: 0
+    amount: 1
+    display: "&x&E&7&C&2&4&5ซื้อลอตเตอรี่"
+    lore:
+      - "&asaa"
+      - "&asee"
+    slots:
+      - 31
+  top_ticket:
+    Material: "BOOK"
+    customModelData: 0
+    amount: 1
+    display: "&x&E&7&C&2&4&5ลอตเตอรี่ยอดฮิต"
+    lore:
+      - "&asaa"
+      - "&asee"
+    slots:
+      - 34
+  close:
+    Material: "PAPER"
+    customModelData: 10215
+    amount: 1
+    display: "&x&B&8&2&8&3&Aปิดหน้าเมนู"
+    lore: []
+    slots:
+      - 49
+  info_system:
+    Material: "PAPER"
+    customModelData: 10237
+    amount: 1
+    display: "&x&E&7&C&2&4&5เกี่ยวกับระบบ"
+    lore:
+      - "&asaa"
+      - "&asee"
+    slots:
+      - 50
