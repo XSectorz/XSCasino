@@ -1,0 +1,4 @@
+name: XSCasino
+version: '${project.version}'
+main: net.xsapi.panat.xscasino.XSCasino
+api-version: 1.20
