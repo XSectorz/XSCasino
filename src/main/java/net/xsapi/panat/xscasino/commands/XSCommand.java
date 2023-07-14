@@ -15,16 +15,15 @@ public class XSCommand implements CommandExecutor {
         if(commandSender instanceof Player) {
 
             Player sender = (Player) commandSender;
-            Audience player = (Audience) sender;
             if (command.getName().equalsIgnoreCase("xscasino")) {
                 if(args.length == 0) {
                     if(!sender.hasPermission("xsapi.xscasino.help")) {
-                        player.sendMessage(XSUtils.messages("no_permission"));
+                        XSUtils.sendMessages(sender,"no_permission");
                         return false;
                     }
 
                     for(String str : XSUtils.messagesList("commands_list")) {
-                        player.sendMessage(XSUtils.replaceComponents(str));
+                        XSUtils.sendReplaceComponents(sender,str);
                     }
 
                     return true;
@@ -32,7 +31,7 @@ public class XSCommand implements CommandExecutor {
                     if(args[0].equalsIgnoreCase("lottery")) {
                         if(!sender.hasPermission("xsapi.xscasino.lottery")) {
 
-                            player.sendMessage(XSUtils.messages("no_permission"));
+                            XSUtils.sendMessages(sender,"no_permission");
                             return false;
                         }
 

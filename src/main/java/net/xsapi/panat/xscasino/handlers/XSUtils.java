@@ -1,10 +1,12 @@
 package net.xsapi.panat.xscasino.handlers;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.xsapi.panat.xscasino.configuration.messages;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -13,19 +15,23 @@ import java.util.Collections;
 
 public class XSUtils {
 
-    public static Component messages(String path) {
+    public static void sendMessages(Player p, String path) {
+        Audience player = (Audience) p;
+
         MiniMessage miniMessage = MiniMessage.builder().build();
 
         Component parsedMessage = MiniMessage.miniMessage().deserialize((messages.customConfig.getString(path).replace("%prefix%"
         ,messages.customConfig.getString("prefix"))));
 
-        return parsedMessage;
+        player.sendMessage(parsedMessage);
     }
 
-    public static Component replaceComponents(String str) {
+    public static void sendReplaceComponents(Player p,String str) {
+        Audience player = (Audience) p;
         MiniMessage miniMessage = MiniMessage.builder().build();
 
-        return MiniMessage.miniMessage().deserialize(str);
+        player.sendMessage(MiniMessage.miniMessage().deserialize(str.replace("%prefix%"
+                ,messages.customConfig.getString("prefix"))));
     }
 
     public static ArrayList<String> messagesList(String path) {

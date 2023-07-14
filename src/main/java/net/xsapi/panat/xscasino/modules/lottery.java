@@ -12,6 +12,7 @@ public class lottery extends XSCasinoTemplates {
     public int invSize;
     public String title;
     public HashMap<Integer,Integer> lotteryList = new HashMap<>();
+    public double priceTicket;
 
     public lottery(File customConfigFile, FileConfiguration customConfig) {
         setCustomConfigFile(customConfigFile);
@@ -19,6 +20,7 @@ public class lottery extends XSCasinoTemplates {
 
         setTitle(getCustomConfig().getString("configuration.title").replace("&","§"));
         setInvSize(getCustomConfig().getInt("configuration.invnetorySize"));
+        setPriceTicket(getCustomConfig().getDouble("configuration.price_per_ticket"));
 
         for (String lottery : getCustomConfig().getStringList("data.lottery_list")) {
             int key = Integer.parseInt(lottery.split(":")[0]);
@@ -26,6 +28,14 @@ public class lottery extends XSCasinoTemplates {
             lotteryList.put(key,amount);
         }
 
+    }
+
+    public void setPriceTicket(double priceTicket) {
+        this.priceTicket = priceTicket;
+    }
+
+    public double getPriceTicket() {
+        return priceTicket;
     }
 
     public HashMap<Integer, Integer> getLotteryList() {

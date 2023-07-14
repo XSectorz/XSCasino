@@ -1,5 +1,6 @@
 package net.xsapi.panat.xscasino.handlers;
 
+import net.milkbowl.vault.economy.Economy;
 import net.xsapi.panat.xscasino.configuration.lotteryConfig;
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.events.inventoryEvent;
@@ -9,7 +10,7 @@ import net.xsapi.panat.xscasino.modules.lottery;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.units.qual.A;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +21,8 @@ public class XSHandlers {
 
     public static lottery XSLottery;
     public static HashMap<UUID, XSUser> xsCasinoUser = new HashMap<>();
+
+    private static Economy econ = null;
 
     public static void loadXSCasinoModules() {
 
@@ -50,6 +53,22 @@ public class XSHandlers {
                 XSHandlers.xsCasinoUser.remove(p.getUniqueId());
             }
         }
+    }
+
+    public static void setupAPI() {
+        if (XSCasino.getPlugin().getServer().getPluginManager().getPlugin("Vault") == null) {
+            Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f[XSCasino] Vault : §x§D§F§1§C§6§3Not Found!");
+            XSCasino.getPlugin().getServer().getPluginManager().disablePlugin(XSCasino.getPlugin());
+            Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f[XSCasino] §x§D§F§1§C§6§3Plugin Disabled due not found vault!");
+        } else {
+            RegisteredServiceProvider<Economy> rsp = XSCasino.getPlugin().getServer().getServicesManager().getRegistration(Economy.class);
+            econ = rsp.getProvider();
+            Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f[XSCasino] Vault : §x§2§F§C§0§2§0Found!");
+        }
+    }
+
+    public static Economy getEconomy() {
+        return econ;
     }
 
     public static void registerEvents() {

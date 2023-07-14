@@ -10,3 +10,8 @@ commands_list:
   - " <color:#D11D66>Made With Love (◕ᴥ◕)! XOXO"
   - ""
   - "<gradient:#D326DD:#C221DB:#DB4F07:#B8A120><bold>»————————————◦•♛•◦————————————«</bold></gradient>"
+cant_afford: "%prefix% <color:#D53354>ยอดเงินของคุณไม่เพียงพอในการซื้อ"
+only_positive: "%prefix% <color:#D53354>กรุณากรอกเป็นจำนวนเต็มบวก"
+inputNAN: "%prefix% <color:#D53354>กรุณากรอกเป็นตัวเลขจำนวนเต็มเท่านั้น"
+bought_success: "%prefix% <color:#E7D049>ทำการซื้อลอตเตอรี่ไปจำนวน <color:#38CE18>%amount% <color:#E7D049>ใบ ในราคา <color:#38CE18>%price%<reset>"
+not_in_range: "%prefix% <color:#D53354>กรุณาพิมพ์เลขของลอตเตอรี่ให้อยู่ในช่วง 00-99 "

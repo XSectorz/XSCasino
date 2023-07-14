@@ -1,7 +1,9 @@
 package net.xsapi.panat.xscasino.events;
 
 import de.rapha149.signgui.SignGUI;
+import net.xsapi.panat.xscasino.configuration.messages;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
+import net.xsapi.panat.xscasino.handlers.XSUtils;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -37,7 +39,38 @@ public class inventoryEvent implements Listener {
                         .onFinish((lines) -> {
                             if (!lines[1].isEmpty() && !lines[2].isEmpty()) {
                                 int ticket = Integer.parseInt(lines[1]);
-                                int amount = Integer.parseInt(lines[2]);
+                                int amount = 0;
+
+                                try {
+                                    amount = Integer.parseInt(lines[2]);
+                                } catch (NumberFormatException nf) {
+                                    XSUtils.sendMessages(p,"inputNAN");
+                                    return null;
+                                }
+
+                                if(amount <= 0) {
+                                    XSUtils.sendMessages(p,"only_positive");
+                                    return null;
+                                }
+
+                                double price = amount*XSHandlers.XSLottery.getPriceTicket();
+
+                                if(XSHandlers.getEconomy().getBalance(p) < price) {
+                                    XSUtils.sendMessages(p,"cant_afford");
+                                    return null;
+                                }
+
+                                if(!(ticket >= 0 && ticket <= 99)) {
+                                    XSUtils.sendMessages(p,"not_in_range");
+                                    return null;
+                                }
+
+                                XSHandlers.getEconomy().withdrawPlayer(p,(double) price);
+
+                                String message = messages.customConfig.getString("bought_success").replace("%amount%",String.valueOf(amount))
+                                        .replace("%price%",String.valueOf(price));
+                                XSUtils.sendReplaceComponents(p,message);
+
                                 if(XSHandlers.xsCasinoUser.containsKey(p.getUniqueId())) {
                                     XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
                                     if(xsUser.getLottery().containsKey(ticket)) {

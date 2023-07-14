@@ -26,6 +26,7 @@ public final class XSCasino extends JavaPlugin {
         plugin = this;
 
         new configLoader();
+        XSHandlers.setupAPI();
         XSHandlers.loadXSCasinoModules();
         XSHandlers.registerEvents();
 

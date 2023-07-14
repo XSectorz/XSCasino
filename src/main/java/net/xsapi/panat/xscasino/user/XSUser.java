@@ -6,7 +6,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -20,7 +19,7 @@ public class XSUser {
     public XSUser(Player p) {
         this.p = p;
         this.userFile = new File(XSCasino.getPlugin().getDataFolder() + "/data", p.getUniqueId() + ".yml");
-        this.userConfig = (FileConfiguration) YamlConfiguration.loadConfiguration(this.userFile);
+        this.userConfig = YamlConfiguration.loadConfiguration(this.userFile);
     }
 
     public void createUser() {
