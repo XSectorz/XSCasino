@@ -33,4 +33,5 @@ public class XSCasinoTemplates {
     public String getName() {
         return name;
     }
+
 }

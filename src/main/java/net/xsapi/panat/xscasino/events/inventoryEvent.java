@@ -2,6 +2,7 @@ package net.xsapi.panat.xscasino.events;
 
 import de.rapha149.signgui.SignGUI;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
+import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -35,7 +36,33 @@ public class inventoryEvent implements Listener {
                         .stripColor()
                         .onFinish((lines) -> {
                             if (!lines[1].isEmpty() && !lines[2].isEmpty()) {
-                                p.sendMessage("Line: " + lines[1] + "  " + lines[2]);
+                                int ticket = Integer.parseInt(lines[1]);
+                                int amount = Integer.parseInt(lines[2]);
+                                if(XSHandlers.xsCasinoUser.containsKey(p.getUniqueId())) {
+                                    XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
+                                    if(xsUser.getLottery().containsKey(ticket)) {
+                                        xsUser.getLottery().replace(ticket,
+                                                xsUser.getLottery().get(ticket)+amount);
+                                        p.sendMessage("Buy Add: " + lines[1] + "  " + xsUser.getLottery().get(Integer.parseInt(lines[1])));
+                                    } else {
+                                        xsUser.getLottery().put(ticket,amount);
+                                        p.sendMessage("Buy: " + lines[1] + "  " + lines[2]);
+                                    }
+                                } else {
+                                    XSUser xsUser = new XSUser(p);
+                                    xsUser.createUser();
+                                    xsUser.getLottery().put(ticket,amount);
+                                    XSHandlers.xsCasinoUser.put(p.getUniqueId(),xsUser);
+                                    p.sendMessage("Buy New: " + lines[1] + "  " + lines[2]);
+                                }
+
+                                if(XSHandlers.XSLottery.getLotteryList().containsKey(ticket)) {
+                                    XSHandlers.XSLottery.getLotteryList().replace(ticket,
+                                            XSHandlers.XSLottery.getLotteryList().get(ticket)+amount);
+                                } else {
+                                    XSHandlers.XSLottery.getLotteryList().put(ticket,amount);
+                                }
+
                             }
                             return null;
                         }).open(p);

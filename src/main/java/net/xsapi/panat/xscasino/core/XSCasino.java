@@ -35,5 +35,7 @@ public final class XSCasino extends JavaPlugin {
     @Override
     public void onDisable() {
         Bukkit.getConsoleSender().sendMessage("§cPlugin Disabled 1.20.1!");
+        XSHandlers.saveXSCasinoModules();
+        XSHandlers.saveUserData();
     }
 }

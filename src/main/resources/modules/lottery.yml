@@ -3,6 +3,9 @@ configuration:
   title: "&8Lottery"
   invnetorySize: 54
 
+data:
+  lottery_list: []
+
 contents:
   barrier:
     Material: "PAPER"
