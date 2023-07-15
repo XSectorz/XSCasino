@@ -3,6 +3,9 @@ configuration:
   title: "&8Lottery"
   invnetorySize: 54
   price_per_ticket: 1000
+  start_pot: 10000
+  pot_extra: 750 #per ticket buy
+  prize_time: 20 #prize time in secs
 
 data:
   lottery_list: []
@@ -70,8 +73,11 @@ contents:
     amount: 1
     display: "&x&E&7&C&2&4&5รายละเอียดรางวัล"
     lore:
-      - "&asaa"
-      - "&asee"
+      - "&r"
+      - "&7ยอดเงินรางวัลทั้งหมด : &x&F&5&C&A&5&5%current_pot% &f"
+      - "&7จำนวนลอตเตอรี่ในระบบ : &x&F&5&C&A&5&5%current_lottery% &7ใบ"
+      - "&r"
+      - "&8 ▪ &x&9&E&F&0&6&3เมื่อลอตเตอรี่ถูกซื้อ  &x&F&5&C&A&5&5+750 &f /  &x&F&5&C&A&5&51 ตั๋ว"
     slots:
       - 13
   info_leaderboard:

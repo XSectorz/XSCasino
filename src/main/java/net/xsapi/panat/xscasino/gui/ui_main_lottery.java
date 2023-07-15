@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 
@@ -24,6 +25,11 @@ public class ui_main_lottery {
             String display = XSHandlers.XSLottery.getCustomConfig().getString("contents." + contents + ".display");
             ArrayList<String> lores = (ArrayList<String>) XSHandlers.XSLottery.getCustomConfig().getStringList("contents." + contents + ".lore");
             ArrayList<String> slots = (ArrayList<String>) XSHandlers.XSLottery.getCustomConfig().getStringList("contents." + contents + ".slots");
+
+            lores.replaceAll(e -> e.replace("%current_pot%",
+                            String.valueOf(XSHandlers.XSLottery.getPotPrize()))
+                    .replace("%current_lottery%",
+                            String.valueOf(XSHandlers.XSLottery.getAmountTicket())));
 
             ItemStack it = XSUtils.createItemStack(mat,amount,modelData,display,lores);
             for(int i = 0 ; i < slots.size() ; i++) {

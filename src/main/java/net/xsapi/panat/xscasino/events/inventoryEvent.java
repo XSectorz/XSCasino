@@ -71,22 +71,25 @@ public class inventoryEvent implements Listener {
                                         .replace("%price%",String.valueOf(price));
                                 XSUtils.sendReplaceComponents(p,message);
 
+                                XSHandlers.XSLottery.addPotPrize(amount);
+                                XSHandlers.XSLottery.setAmountTicket(XSHandlers.XSLottery.getAmountTicket()+amount);
+
                                 if(XSHandlers.xsCasinoUser.containsKey(p.getUniqueId())) {
                                     XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
                                     if(xsUser.getLottery().containsKey(ticket)) {
                                         xsUser.getLottery().replace(ticket,
                                                 xsUser.getLottery().get(ticket)+amount);
-                                        p.sendMessage("Buy Add: " + lines[1] + "  " + xsUser.getLottery().get(Integer.parseInt(lines[1])));
+                                        //p.sendMessage("Buy Add: " + lines[1] + "  " + xsUser.getLottery().get(Integer.parseInt(lines[1])));
                                     } else {
                                         xsUser.getLottery().put(ticket,amount);
-                                        p.sendMessage("Buy: " + lines[1] + "  " + lines[2]);
+                                        //p.sendMessage("Buy: " + lines[1] + "  " + lines[2]);
                                     }
                                 } else {
                                     XSUser xsUser = new XSUser(p);
                                     xsUser.createUser();
                                     xsUser.getLottery().put(ticket,amount);
                                     XSHandlers.xsCasinoUser.put(p.getUniqueId(),xsUser);
-                                    p.sendMessage("Buy New: " + lines[1] + "  " + lines[2]);
+                                   // p.sendMessage("Buy New: " + lines[1] + "  " + lines[2]);
                                 }
 
                                 if(XSHandlers.XSLottery.getLotteryList().containsKey(ticket)) {

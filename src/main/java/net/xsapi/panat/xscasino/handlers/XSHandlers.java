@@ -1,6 +1,7 @@
 package net.xsapi.panat.xscasino.handlers;
 
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
 import net.xsapi.panat.xscasino.configuration.lotteryConfig;
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.events.inventoryEvent;
@@ -23,6 +24,7 @@ public class XSHandlers {
     public static HashMap<UUID, XSUser> xsCasinoUser = new HashMap<>();
 
     private static Economy econ = null;
+    private static Permission perms = null;
 
     public static void loadXSCasinoModules() {
 
@@ -63,12 +65,18 @@ public class XSHandlers {
         } else {
             RegisteredServiceProvider<Economy> rsp = XSCasino.getPlugin().getServer().getServicesManager().getRegistration(Economy.class);
             econ = rsp.getProvider();
+            RegisteredServiceProvider<Permission> rspPermission = XSCasino.getPlugin().getServer().getServicesManager().getRegistration(Permission.class);
+            perms = rspPermission.getProvider();
             Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f[XSCasino] Vault : §x§2§F§C§0§2§0Found!");
         }
     }
 
     public static Economy getEconomy() {
         return econ;
+    }
+
+    public static Permission getPerms() {
+        return perms;
     }
 
     public static void registerEvents() {

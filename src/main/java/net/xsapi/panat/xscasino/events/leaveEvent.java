@@ -7,9 +7,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.ArrayList;
-import java.util.Map;
-
 public class leaveEvent implements Listener {
 
     @EventHandler
@@ -17,16 +14,8 @@ public class leaveEvent implements Listener {
         Player p = e.getPlayer();
 
         if(XSHandlers.xsCasinoUser.containsKey(p.getUniqueId())) {
-
             XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
-
-            ArrayList<String> lotteryList = new ArrayList<>();
-            for(Map.Entry<Integer,Integer> lottery : xsUser.getLottery().entrySet()) {
-                lotteryList.add(lottery.getKey()+":"+lottery.getValue());
-            }
-            xsUser.getUserConfig().set("modules.lottery.data",lotteryList);
-
-            xsUser.saveData();
+            xsUser.saveModulesData();
 
             XSHandlers.xsCasinoUser.remove(p.getUniqueId());
         }

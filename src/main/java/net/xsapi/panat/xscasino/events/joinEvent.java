@@ -22,13 +22,7 @@ public class joinEvent implements Listener {
             XSUser xsUser = new XSUser(p);
 
             if(xsUser.getUserConfig().get("modules.lottery.data") != null) {
-                for(String lottery : xsUser.getUserConfig().getStringList("modules.lottery.data")) {
-
-                    int key = Integer.parseInt(lottery.split(":")[0]);
-                    int amount = Integer.parseInt(lottery.split(":")[1]);
-
-                    xsUser.getLottery().put(key,amount);
-                }
+                xsUser.loadUserData();
             }
 
             XSHandlers.xsCasinoUser.put(p.getUniqueId(),xsUser);
