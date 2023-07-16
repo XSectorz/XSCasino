@@ -8,15 +8,20 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.util.*;
+
+import static net.xsapi.panat.xscasino.gui.ui_main_lottery.updateInventory;
 
 public class lottery extends XSCasinoTemplates {
 
     public int invSize;
     public String title;
     public HashMap<Integer,Integer> lotteryList = new HashMap<>();
+    public HashMap<UUID, Inventory> xsLotteryUserOpenUI = new HashMap<>();
     public double priceTicket;
     public double potPrize;
     public double potExtra;
@@ -29,7 +34,7 @@ public class lottery extends XSCasinoTemplates {
         setCustomConfig(customConfig);
 
         setTitle(getCustomConfig().getString("configuration.title").replace("&","§"));
-        setInvSize(getCustomConfig().getInt("configuration.invnetorySize"));
+        setInvSize(getCustomConfig().getInt("configuration.inventorySize"));
         setPriceTicket(getCustomConfig().getDouble("configuration.price_per_ticket"));
         setPotExtra(getCustomConfig().getDouble("configuration.pot_extra"));
         setPotPrize(getCustomConfig().getDouble("configuration.start_pot"));
@@ -54,6 +59,7 @@ public class lottery extends XSCasinoTemplates {
         setPotPrize(getPotPrize() + currentAmt*getPotExtra());
         createTask();
         loadUser();
+        updateInventoryTask();
     }
 
     public void createTask() {
@@ -194,9 +200,25 @@ public class lottery extends XSCasinoTemplates {
             }
 
         }
-        Bukkit.broadcastMessage("-----------------------------");
+      //  Bukkit.broadcastMessage("-----------------------------");
 
         clearLotteryData();
+    }
+
+    public HashMap<UUID, Inventory> getXsLotteryUserOpenUI() {
+        return xsLotteryUserOpenUI;
+    }
+
+    public void updateInventoryTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Bukkit.broadcastMessage("UPDATING...");
+                for(Map.Entry<UUID,Inventory> playerOpen : xsLotteryUserOpenUI.entrySet()) {
+                    updateInventory(Bukkit.getPlayer(playerOpen.getKey()));
+                }
+            }
+        }.runTaskTimer(XSCasino.getPlugin(), 0L, 20L);
     }
 
     public void clearLotteryData() {

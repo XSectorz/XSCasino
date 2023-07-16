@@ -1,72 +1,26 @@
 
 configuration:
   title: "&8Lottery"
-  invnetorySize: 54
+  inventorySize: 54
   price_per_ticket: 1000
   start_pot: 10000
   pot_extra: 750 #per ticket buy
   prize_time: 20 #prize time in secs
 
+topTicket_configuration:
+  title: "&8Top Tickets"
+  inventorySize: 54
 data:
   lottery_list: []
 
+background_contents:
+  Material: "PAPER"
+  customModelData: 10230
+  amount: 1
+  display: "&r"
+  lore: [ ]
+
 contents:
-  barrier:
-    Material: "PAPER"
-    customModelData: 10230
-    amount: 1
-    display: "&r"
-    lore: []
-    slots:
-      - 0
-      - 1
-      - 2
-      - 3
-      - 4
-      - 5
-      - 6
-      - 7
-      - 8
-      - 9
-      - 10
-      - 11
-      - 12
-      - 14
-      - 15
-      - 16
-      - 17
-      - 18
-      - 19
-      - 20
-      - 21
-      - 22
-      - 23
-      - 24
-      - 25
-      - 26
-      - 27
-      - 28
-      - 29
-      - 30
-      - 32
-      - 33
-      - 35
-      - 36
-      - 37
-      - 38
-      - 39
-      - 40
-      - 41
-      - 42
-      - 43
-      - 44
-      - 45
-      - 46
-      - 47
-      - 48
-      - 51
-      - 52
-      - 53
   info_current:
     Material: "PAPER"
     customModelData: 10231
@@ -76,6 +30,8 @@ contents:
       - "&r"
       - "&7ยอดเงินรางวัลทั้งหมด : &x&F&5&C&A&5&5%current_pot% &f"
       - "&7จำนวนลอตเตอรี่ในระบบ : &x&F&5&C&A&5&5%current_lottery% &7ใบ"
+      - "&r"
+      - "&7จะประกาศรางวัลในอีก : &x&0&0&F&F&5&A%lottery_timer%"
       - "&r"
       - "&8 ▪ &x&9&E&F&0&6&3เมื่อลอตเตอรี่ถูกซื้อ  &x&F&5&C&A&5&5+750 &f /  &x&F&5&C&A&5&51 ตั๋ว"
     slots:
@@ -110,6 +66,26 @@ contents:
       - "&asee"
     slots:
       - 34
+  close:
+    Material: "PAPER"
+    customModelData: 10215
+    amount: 1
+    display: "&x&B&8&2&8&3&Aปิดหน้าเมนู"
+    lore: []
+    slots:
+      - 49
+  info_system:
+    Material: "PAPER"
+    customModelData: 10237
+    amount: 1
+    display: "&x&E&7&C&2&4&5เกี่ยวกับระบบ"
+    lore:
+      - "&asaa"
+      - "&asee"
+    slots:
+      - 50
+
+top_ticket_contents:
   close:
     Material: "PAPER"
     customModelData: 10215

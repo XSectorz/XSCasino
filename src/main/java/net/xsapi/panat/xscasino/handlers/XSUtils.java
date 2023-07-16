@@ -38,6 +38,10 @@ public class XSUtils {
         return (ArrayList<String>) messages.customConfig.getStringList("commands_list");
     }
 
+    public static String getMessagesConfig(String path) {
+        return messages.customConfig.getString(path).replace("&","§");
+    }
+
     public static ItemStack createItemStack(Material mat,int amount,int customModelData,
                                             String name,ArrayList<String> lore) {
 

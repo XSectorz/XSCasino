@@ -17,9 +17,39 @@ public class ui_main_lottery {
 
         Inventory inv = Bukkit.createInventory(null, XSHandlers.XSLottery.getInvSize(),XSHandlers.XSLottery.getTitle());
 
+        Material mat = Material.getMaterial(XSHandlers.XSLottery.getCustomConfig().getString("background_contents.Material"));
+        int amount = XSHandlers.XSLottery.getCustomConfig().getInt("background_contents.amount");
+        int modelData = XSHandlers.XSLottery.getCustomConfig().getInt("background_contents.customModelData");
+        String display = XSHandlers.XSLottery.getCustomConfig().getString("background_contents.display");
+        ArrayList<String> lores = (ArrayList<String>) XSHandlers.XSLottery.getCustomConfig().getStringList("background_contents.lore");
+
+        ItemStack it = XSUtils.createItemStack(mat,amount,modelData,display,lores);
+        for(int i = 0 ; i < 54 ; i++) {
+            inv.setItem(i,it);
+        }
+
+        if(!XSHandlers.XSLottery.getXsLotteryUserOpenUI().containsKey(p.getUniqueId())) {
+            XSHandlers.XSLottery.getXsLotteryUserOpenUI().put(p.getUniqueId(),inv);
+        }
+
+        updateInventory(p);
+        p.openInventory(inv);
+    }
+
+    public static void updateInventory(Player p) {
+
+        Inventory inv = XSHandlers.XSLottery.getXsLotteryUserOpenUI().get(p.getUniqueId());
+        updateInventoryContents(inv,p);
+        p.updateInventory();
+    }
+
+    public static void updateInventoryContents(Inventory inv,Player p) {
+
+        String currTime = XSHandlers.convertTime(Math.abs(System.currentTimeMillis()-XSHandlers.XSLottery.getNextPrizeTime()));
+
         for(String contents : XSHandlers.XSLottery.getCustomConfig().getConfigurationSection("contents").getKeys(false)) {
             Material mat = Material.getMaterial(XSHandlers.XSLottery.getCustomConfig().getString("contents."
-            + contents + ".Material"));
+                    + contents + ".Material"));
             int amount = XSHandlers.XSLottery.getCustomConfig().getInt("contents."  + contents + ".amount");
             int modelData = XSHandlers.XSLottery.getCustomConfig().getInt("contents."  + contents + ".customModelData");
             String display = XSHandlers.XSLottery.getCustomConfig().getString("contents." + contents + ".display");
@@ -29,7 +59,8 @@ public class ui_main_lottery {
             lores.replaceAll(e -> e.replace("%current_pot%",
                             String.valueOf(XSHandlers.XSLottery.getPotPrize()))
                     .replace("%current_lottery%",
-                            String.valueOf(XSHandlers.XSLottery.getAmountTicket())));
+                            String.valueOf(XSHandlers.XSLottery.getAmountTicket()))
+                    .replace("%lottery_timer%",currTime));
 
             ItemStack it = XSUtils.createItemStack(mat,amount,modelData,display,lores);
             for(int i = 0 ; i < slots.size() ; i++) {
@@ -37,8 +68,6 @@ public class ui_main_lottery {
             }
 
         }
-
-        p.openInventory(inv);
     }
 
 }

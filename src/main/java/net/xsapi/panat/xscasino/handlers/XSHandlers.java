@@ -85,4 +85,50 @@ public class XSHandlers {
         Bukkit.getPluginManager().registerEvents(new leaveEvent(), XSCasino.getPlugin());
     }
 
+    public static String convertTime(long millis) {
+        int seconds = (int) (millis / 1000) % 60;
+        int minutes = (int) ((millis / (1000 * 60)) % 60);
+        int hours = (int) ((millis / (1000 * 60 * 60)) % 24);
+        long days = millis / (1000 * 60 * 60 * 24);
+
+        String timer = "";
+
+        if(days >= 1) {
+            timer += days;
+            if(days == 1) {
+                timer += " " + XSUtils.getMessagesConfig("time.day") + " ";
+            } else {
+                timer += " " + XSUtils.getMessagesConfig("time.days") + " ";
+            }
+        }
+        if(hours >= 1) {
+            timer += hours;
+            if(hours == 1) {
+                timer += " " + XSUtils.getMessagesConfig("time.hour") + " ";
+            } else {
+                timer += " " + XSUtils.getMessagesConfig("time.hours") + " ";
+            }
+        }
+        if(minutes >= 1) {
+            timer += minutes;
+            if(minutes == 1) {
+                timer += " " + XSUtils.getMessagesConfig("time.minute") + " ";
+            } else {
+                timer += " " + XSUtils.getMessagesConfig("time.minutes") + " ";
+            }
+        }
+
+        if(seconds >= 1) {
+            timer += seconds;
+            if(minutes == 1) {
+                timer += " " + XSUtils.getMessagesConfig("time.second") + " ";
+            } else {
+                timer += " " + XSUtils.getMessagesConfig("time.seconds") + " ";
+            }
+        }
+
+        return timer;
+    }
+
+
 }
