@@ -2,9 +2,11 @@ package net.xsapi.panat.xscasino.events;
 
 import de.rapha149.signgui.SignGUI;
 import net.xsapi.panat.xscasino.configuration.messages;
+import net.xsapi.panat.xscasino.gui.ui_topticket_lottery;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
 import net.xsapi.panat.xscasino.handlers.XSUtils;
 import net.xsapi.panat.xscasino.user.XSUser;
+import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -30,8 +32,11 @@ public class inventoryEvent implements Listener {
             if(XSHandlers.XSLottery.getCustomConfig().getStringList("contents.close.slots").contains(String.valueOf(e.getSlot()))) {
                 p.closeInventory();
             }
-            if(XSHandlers.XSLottery.getCustomConfig().getStringList("contents.buy_ticket.slots").contains(String.valueOf(e.getSlot()))) {
-
+            else if(XSHandlers.XSLottery.getCustomConfig().getStringList("contents.top_ticket.slots").contains(String.valueOf(e.getSlot()))) {
+                ui_topticket_lottery.openTopTicket(p);
+            }
+            else if(XSHandlers.XSLottery.getCustomConfig().getStringList("contents.buy_ticket.slots").contains(String.valueOf(e.getSlot()))) {
+                p.closeInventory();
                 new SignGUI()
                         .lines("§6พิมพ์เลข/จำนวน", "69", "1", "§6^^^^^^^^^^^")
                         .type(Material.DARK_OAK_SIGN)
@@ -100,6 +105,10 @@ public class inventoryEvent implements Listener {
                                     XSHandlers.XSLottery.getLotteryList().put(ticket,amount);
                                 }
 
+                                if(XSHandlers.XSLottery.getXsLotteryUserOpenUI().containsKey(p.getUniqueId())) {
+                                    XSHandlers.XSLottery.getXsLotteryUserOpenUI().remove(p.getUniqueId());
+                                }
+
                             }
                             return null;
                         }).open(p);
@@ -114,8 +123,10 @@ public class inventoryEvent implements Listener {
     public void onClose(InventoryCloseEvent e) {
         Player p = (Player) e.getPlayer();
 
-        if (XSHandlers.XSLottery.getXsLotteryUserOpenUI().containsKey(p.getUniqueId())) {
-            XSHandlers.XSLottery.getXsLotteryUserOpenUI().remove(p.getUniqueId());
+        if(e.getView().getTitle().equalsIgnoreCase(XSHandlers.XSLottery.getTitle())) {
+            if (XSHandlers.XSLottery.getXsLotteryUserOpenUI().containsKey(p.getUniqueId())) {
+                XSHandlers.XSLottery.getXsLotteryUserOpenUI().remove(p.getUniqueId());
+            }
         }
     }
 

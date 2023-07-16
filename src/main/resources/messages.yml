@@ -24,3 +24,8 @@ time: #use normal color like (&6 &a &e or Hex color)
   minute: "นาที"
   seconds: "วินาที"
   second: "วินาที"
+  soon: "กำลังประกาศรางวัล"
+
+gui_message: #use normal color like (&6 &a &e or Hex color)
+  no_winner: "&x&B&8&2&8&3&Aยังไม่มีผู้ชนะ"
+  no_data: "&x&B&8&2&8&3&A-"

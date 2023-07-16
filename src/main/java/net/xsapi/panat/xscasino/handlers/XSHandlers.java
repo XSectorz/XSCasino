@@ -7,6 +7,7 @@ import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.events.inventoryEvent;
 import net.xsapi.panat.xscasino.events.joinEvent;
 import net.xsapi.panat.xscasino.events.leaveEvent;
+import net.xsapi.panat.xscasino.gui.ui_topticket_lottery;
 import net.xsapi.panat.xscasino.modules.lottery;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
@@ -83,6 +84,7 @@ public class XSHandlers {
         Bukkit.getPluginManager().registerEvents(new inventoryEvent(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new joinEvent(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new leaveEvent(), XSCasino.getPlugin());
+        Bukkit.getPluginManager().registerEvents(new ui_topticket_lottery(), XSCasino.getPlugin());
     }
 
     public static String convertTime(long millis) {
@@ -125,6 +127,10 @@ public class XSHandlers {
             } else {
                 timer += " " + XSUtils.getMessagesConfig("time.seconds") + " ";
             }
+        }
+
+        if(timer.length() == 0) {
+            timer += XSUtils.getMessagesConfig("time.soon");
         }
 
         return timer;

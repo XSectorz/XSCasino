@@ -2,6 +2,7 @@ package net.xsapi.panat.xscasino.modules;
 
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
+import net.xsapi.panat.xscasino.handlers.XSUtils;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -29,12 +30,22 @@ public class lottery extends XSCasinoTemplates {
     public int prizeTime;
     public long nextPrizeTime;
 
+    public String topTicketTitle;
+    public int topTicketSize;
+
+    public String winner;
+    public int ticketWinNum;
+    public int numberTicketWin;
+    public int totalWinPrize;
+
     public lottery(File customConfigFile, FileConfiguration customConfig) {
         setCustomConfigFile(customConfigFile);
         setCustomConfig(customConfig);
 
         setTitle(getCustomConfig().getString("configuration.title").replace("&","§"));
+        setTopTicketTitle(getCustomConfig().getString("topTicket_configuration.title").replace("&","§"));
         setInvSize(getCustomConfig().getInt("configuration.inventorySize"));
+        setTopTicketSize(getCustomConfig().getInt("topTicket_configuration.inventorySize"));
         setPriceTicket(getCustomConfig().getDouble("configuration.price_per_ticket"));
         setPotExtra(getCustomConfig().getDouble("configuration.pot_extra"));
         setPotPrize(getCustomConfig().getDouble("configuration.start_pot"));
@@ -44,6 +55,18 @@ public class lottery extends XSCasinoTemplates {
             setNextPrizeTime(System.currentTimeMillis() + (getPrizeTime()*1000L));
         } else {
             setNextPrizeTime(getCustomConfig().getLong("data.next_prize_time"));
+        }
+
+        if(getCustomConfig().get("data.winner") == null) {
+            setWinner("");
+            setTicketWinNum(-1);
+            setNumberTicketWin(-1);
+            setTotalWinPrize(-1);
+        } else {
+            setWinner(getCustomConfig().getString("data.winner.name"));
+            setTicketWinNum(getCustomConfig().getInt("data.winner.numberTicket"));
+            setNumberTicketWin(getCustomConfig().getInt("data.winner.number"));
+            setTotalWinPrize(getCustomConfig().getInt("data.winner.totalPrize"));
         }
 
         int currentAmt = 0;
@@ -59,7 +82,54 @@ public class lottery extends XSCasinoTemplates {
         setPotPrize(getPotPrize() + currentAmt*getPotExtra());
         createTask();
         loadUser();
-        updateInventoryTask();
+    }
+
+    public int getNumberTicketWin() {
+        return numberTicketWin;
+    }
+
+    public void setNumberTicketWin(int numberTicketWin) {
+        this.numberTicketWin = numberTicketWin;
+    }
+
+    public void setTotalWinPrize(int totalWinPrize) {
+        this.totalWinPrize = totalWinPrize;
+    }
+
+    public int getTotalWinPrize() {
+        return totalWinPrize;
+    }
+
+    public void setTicketWinNum(int ticketWinNum) {
+        this.ticketWinNum = ticketWinNum;
+    }
+
+    public int getTicketWinNum() {
+        return ticketWinNum;
+    }
+
+    public String getWinner() {
+        return winner;
+    }
+
+    public void setWinner(String winner) {
+        this.winner = winner;
+    }
+
+    public void setTopTicketSize(int topTicketSize) {
+        this.topTicketSize = topTicketSize;
+    }
+
+    public void setTopTicketTitle(String topTicketTitle) {
+        this.topTicketTitle = topTicketTitle;
+    }
+
+    public int getTopTicketSize() {
+        return topTicketSize;
+    }
+
+    public String getTopTicketTitle() {
+        return topTicketTitle;
     }
 
     public void createTask() {
@@ -80,8 +150,12 @@ public class lottery extends XSCasinoTemplates {
                     Bukkit.broadcastMessage("Lottery Prize Out! " + str);
                     sendReward(prizeNum);
                 }
+                for(Map.Entry<UUID,Inventory> playerOpen : xsLotteryUserOpenUI.entrySet()) {
+                    updateInventory(Bukkit.getPlayer(playerOpen.getKey()));
+                }
             }
         }, 0L, 20L);
+
     }
 
     public void loadUser() {
@@ -111,6 +185,9 @@ public class lottery extends XSCasinoTemplates {
         File[] allData = new File(XSCasino.getPlugin().getDataFolder() + "/data").listFiles();
 
         int amountWinticket = 0;
+
+        String winnerName = "";
+        int MaxAmountOfTicket = 0;
       //  Bukkit.broadcastMessage("-------------------");
       //  for(Map.Entry<UUID,XSUser> xsPlayer : XSHandlers.xsCasinoUser.entrySet()) {
       //     Bukkit.broadcastMessage("UUID: " + xsPlayer.getKey());
@@ -157,6 +234,11 @@ public class lottery extends XSCasinoTemplates {
                                // Bukkit.broadcastMessage("ADD!");
                                 lotteryWinner.put(uuid,amount);
                                 amountWinticket += amount;
+
+                                if(amount > MaxAmountOfTicket) {
+                                    MaxAmountOfTicket = amount;
+                                    winnerName = fileConfig.getString("AccountName");
+                                }
                             }
 
                             if(XSHandlers.xsCasinoUser.containsKey(uuid)) {
@@ -177,6 +259,11 @@ public class lottery extends XSCasinoTemplates {
                 }
             }
         }
+
+        setWinner(winnerName);
+        setNumberTicketWin(amountWinticket);
+        setTicketWinNum(prizeNum);
+        setTotalWinPrize((int) getPotPrize());
 
         for (Map.Entry<UUID,Integer> winner : lotteryWinner.entrySet()) {
             double prizePool = (double) winner.getValue()/amountWinticket;
@@ -209,20 +296,10 @@ public class lottery extends XSCasinoTemplates {
         return xsLotteryUserOpenUI;
     }
 
-    public void updateInventoryTask() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                Bukkit.broadcastMessage("UPDATING...");
-                for(Map.Entry<UUID,Inventory> playerOpen : xsLotteryUserOpenUI.entrySet()) {
-                    updateInventory(Bukkit.getPlayer(playerOpen.getKey()));
-                }
-            }
-        }.runTaskTimer(XSCasino.getPlugin(), 0L, 20L);
-    }
 
     public void clearLotteryData() {
         this.setAmountTicket(0);
+        this.setPotPrize(getCustomConfig().getDouble("configuration.start_pot"));
         this.getLotteryList().clear();
     }
 
@@ -311,6 +388,14 @@ public class lottery extends XSCasinoTemplates {
         }
         this.getCustomConfig().set("data.lottery_list",lotteryList);
         this.getCustomConfig().set("data.next_prize_time",getNextPrizeTime());
+
+        if(!getWinner().isEmpty()) {
+            this.getCustomConfig().set("data.winner.name",getWinner());
+            this.getCustomConfig().set("data.winner.number",getTicketWinNum());
+            this.getCustomConfig().set("data.winner.numberTicket",getNumberTicketWin());
+            this.getCustomConfig().set("data.winner.totalPrize",getTotalWinPrize());
+        }
+
 
         try {
             getCustomConfig().save(getCustomConfigFile());
