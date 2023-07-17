@@ -59,7 +59,7 @@ public class inventoryEvent implements Listener {
                                     return null;
                                 }
 
-                                double price = amount*XSHandlers.XSLottery.getPriceTicket();
+                                long price = (long) (amount*XSHandlers.XSLottery.getPriceTicket());
 
                                 if(XSHandlers.getEconomy().getBalance(p) < price) {
                                     XSUtils.sendMessages(p,"cant_afford");

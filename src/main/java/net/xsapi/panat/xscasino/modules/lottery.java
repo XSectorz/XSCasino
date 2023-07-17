@@ -2,7 +2,6 @@ package net.xsapi.panat.xscasino.modules;
 
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
-import net.xsapi.panat.xscasino.handlers.XSUtils;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -10,7 +9,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.util.*;
@@ -24,8 +22,8 @@ public class lottery extends XSCasinoTemplates {
     public HashMap<Integer,Integer> lotteryList = new HashMap<>();
     public HashMap<UUID, Inventory> xsLotteryUserOpenUI = new HashMap<>();
     public double priceTicket;
-    public double potPrize;
-    public double potExtra;
+    public long potPrize;
+    public long potExtra;
     public int amountTicket;
     public int prizeTime;
     public long nextPrizeTime;
@@ -47,8 +45,8 @@ public class lottery extends XSCasinoTemplates {
         setInvSize(getCustomConfig().getInt("configuration.inventorySize"));
         setTopTicketSize(getCustomConfig().getInt("topTicket_configuration.inventorySize"));
         setPriceTicket(getCustomConfig().getDouble("configuration.price_per_ticket"));
-        setPotExtra(getCustomConfig().getDouble("configuration.pot_extra"));
-        setPotPrize(getCustomConfig().getDouble("configuration.start_pot"));
+        setPotExtra(getCustomConfig().getLong("configuration.pot_extra"));
+        setPotPrize(getCustomConfig().getLong("configuration.start_pot"));
         setPrizeTime(getCustomConfig().getInt("configuration.prize_time"));
 
         if(getCustomConfig().get("data.next_prize_time") == null) {
@@ -79,7 +77,7 @@ public class lottery extends XSCasinoTemplates {
 
         setAmountTicket(currentAmt);
 
-        setPotPrize(getPotPrize() + currentAmt*getPotExtra());
+        setPotPrize((long) (getPotPrize() + currentAmt*getPotExtra()));
         createTask();
         loadUser();
     }
@@ -299,7 +297,7 @@ public class lottery extends XSCasinoTemplates {
 
     public void clearLotteryData() {
         this.setAmountTicket(0);
-        this.setPotPrize(getCustomConfig().getDouble("configuration.start_pot"));
+        this.setPotPrize(getCustomConfig().getLong("configuration.start_pot"));
         this.getLotteryList().clear();
     }
 
@@ -333,23 +331,23 @@ public class lottery extends XSCasinoTemplates {
         this.amountTicket = amountTicket;
     }
 
-    public void addPotPrize(int amount) {
-        this.potPrize = this.potPrize+(amount*this.potExtra);
+    public void addPotPrize(long amount) {
+        this.potPrize = (long) (this.potPrize+(amount*this.potExtra));
     }
 
     public double getPotExtra() {
         return potExtra;
     }
 
-    public double getPotPrize() {
+    public long getPotPrize() {
         return potPrize;
     }
 
-    public void setPotExtra(double potExtra) {
+    public void setPotExtra(long potExtra) {
         this.potExtra = potExtra;
     }
 
-    public void setPotPrize(double potPrize) {
+    public void setPotPrize(long potPrize) {
         this.potPrize = potPrize;
     }
 

@@ -70,7 +70,7 @@ public class ui_topticket_lottery implements Listener {
             int modelData = XSHandlers.XSLottery.getCustomConfig().getInt("topTicket_contents.customModelData");
             int index = 0;
             for (Map.Entry<Integer, Integer> entry : list) {
-                Bukkit.broadcastMessage("KEY : " + entry.getKey() + " | " + entry.getValue());
+                //Bukkit.broadcastMessage("KEY : " + entry.getKey() + " | " + entry.getValue());
                 if(index >= XSHandlers.XSLottery.getCustomConfig().getStringList("topTicket_configuration.contentSlot").size()) {
                     break;
                 }
@@ -83,7 +83,8 @@ public class ui_topticket_lottery implements Listener {
                 lores.replaceAll(e -> e.replace("%ticketNum%", String.valueOf(entry.getKey())));
                 lores.replaceAll(e -> e.replace("%ticketAmount%", String.valueOf(entry.getValue())));
 
-                ItemStack it = XSUtils.createItemStack(mat,entry.getKey(),modelData,display,lores);
+                ItemStack it = XSUtils.createItemStack(mat,index+1,modelData,display,lores);
+
                 inv.setItem(Integer.parseInt(XSHandlers.XSLottery.getCustomConfig().getStringList("topTicket_configuration.contentSlot").get(index)),
                         it
                         );
