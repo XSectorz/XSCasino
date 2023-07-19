@@ -100,8 +100,8 @@ public class ui_topticket_lottery implements Listener {
             int amount = XSHandlers.XSLottery.getCustomConfig().getInt("top_ticket_contents."  + contents + ".amount");
             int modelData = XSHandlers.XSLottery.getCustomConfig().getInt("top_ticket_contents."  + contents + ".customModelData");
             String display = XSHandlers.XSLottery.getCustomConfig().getString("top_ticket_contents." + contents + ".display");
-            ArrayList<String> lores = (ArrayList<String>) XSHandlers.XSLottery.getCustomConfig().getStringList("contents." + contents + ".lore");
-            ArrayList<String> slots = (ArrayList<String>) XSHandlers.XSLottery.getCustomConfig().getStringList("contents." + contents + ".slots");
+            ArrayList<String> lores = (ArrayList<String>) XSHandlers.XSLottery.getCustomConfig().getStringList("top_ticket_contents." + contents + ".lore");
+            ArrayList<String> slots = (ArrayList<String>) XSHandlers.XSLottery.getCustomConfig().getStringList("top_ticket_contents." + contents + ".slots");
 
             ItemStack it = XSUtils.createItemStack(mat,amount,modelData,display,lores);
             for(int i = 0 ; i < slots.size() ; i++) {

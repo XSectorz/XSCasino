@@ -28,8 +28,13 @@ public class lottery extends XSCasinoTemplates {
     public int prizeTime;
     public long nextPrizeTime;
 
+    /* Inventory */
     public String topTicketTitle;
     public int topTicketSize;
+    public String myTicketTitle;
+    public int myTicketSize;
+    public int myTicketNextSlot;
+    public int myTicketPrevSlot;
 
     public String winner;
     public int ticketWinNum;
@@ -42,12 +47,17 @@ public class lottery extends XSCasinoTemplates {
 
         setTitle(getCustomConfig().getString("configuration.title").replace("&","§"));
         setTopTicketTitle(getCustomConfig().getString("topTicket_configuration.title").replace("&","§"));
+        setMyTicketTitle(getCustomConfig().getString("myTicket_configuration.title").replace("&","§"));
         setInvSize(getCustomConfig().getInt("configuration.inventorySize"));
         setTopTicketSize(getCustomConfig().getInt("topTicket_configuration.inventorySize"));
+        setMyTicketSize(getCustomConfig().getInt("myTicket_configuration.inventorySize"));
         setPriceTicket(getCustomConfig().getDouble("configuration.price_per_ticket"));
         setPotExtra(getCustomConfig().getLong("configuration.pot_extra"));
         setPotPrize(getCustomConfig().getLong("configuration.start_pot"));
         setPrizeTime(getCustomConfig().getInt("configuration.prize_time"));
+
+        setMyTicketPrevSlot(getCustomConfig().getInt("myTicket_configuration.prevSlot"));
+        setMyTicketNextSlot(getCustomConfig().getInt("myTicket_configuration.nextSlot"));
 
         if(getCustomConfig().get("data.next_prize_time") == null) {
             setNextPrizeTime(System.currentTimeMillis() + (getPrizeTime()*1000L));
@@ -80,6 +90,38 @@ public class lottery extends XSCasinoTemplates {
         setPotPrize((long) (getPotPrize() + currentAmt*getPotExtra()));
         createTask();
         loadUser();
+    }
+
+    public int getMyTicketNextSlot() {
+        return myTicketNextSlot;
+    }
+
+    public int getMyTicketPrevSlot() {
+        return myTicketPrevSlot;
+    }
+
+    public void setMyTicketNextSlot(int myTicketNextSlot) {
+        this.myTicketNextSlot = myTicketNextSlot;
+    }
+
+    public void setMyTicketPrevSlot(int myTicketPrevSlot) {
+        this.myTicketPrevSlot = myTicketPrevSlot;
+    }
+
+    public void setMyTicketSize(int myTicketSize) {
+        this.myTicketSize = myTicketSize;
+    }
+
+    public void setMyTicketTitle(String myTicketTitle) {
+        this.myTicketTitle = myTicketTitle;
+    }
+
+    public int getMyTicketSize() {
+        return myTicketSize;
+    }
+
+    public String getMyTicketTitle() {
+        return myTicketTitle;
     }
 
     public int getNumberTicketWin() {

@@ -2,6 +2,7 @@ package net.xsapi.panat.xscasino.events;
 
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
+import net.xsapi.panat.xscasino.user.UserData;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,6 +28,8 @@ public class joinEvent implements Listener {
 
             XSHandlers.xsCasinoUser.put(p.getUniqueId(),xsUser);
         }
+
+        XSHandlers.getUserData().put(p.getUniqueId(),new UserData(p));
 
     }
 }

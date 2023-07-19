@@ -4,16 +4,19 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import net.xsapi.panat.xscasino.configuration.lotteryConfig;
 import net.xsapi.panat.xscasino.core.XSCasino;
-import net.xsapi.panat.xscasino.events.inventoryEvent;
 import net.xsapi.panat.xscasino.events.joinEvent;
 import net.xsapi.panat.xscasino.events.leaveEvent;
+import net.xsapi.panat.xscasino.gui.ui_main_lottery;
+import net.xsapi.panat.xscasino.gui.ui_myticket_lottery;
 import net.xsapi.panat.xscasino.gui.ui_topticket_lottery;
 import net.xsapi.panat.xscasino.modules.lottery;
+import net.xsapi.panat.xscasino.user.UserData;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +26,7 @@ public class XSHandlers {
 
     public static lottery XSLottery;
     public static HashMap<UUID, XSUser> xsCasinoUser = new HashMap<>();
+    private static HashMap<UUID, UserData> userData = new HashMap<>();
 
     private static Economy econ = null;
     private static Permission perms = null;
@@ -33,6 +37,10 @@ public class XSHandlers {
         XSLottery = new lottery(lotteryConfig.customConfigFile,lotteryConfig.customConfig);
         Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f[XSCasino] loaded §x§6§0§F§F§0§0100% §x§f§f§a§c§2§fcomplete!");
 
+    }
+
+    public static HashMap<UUID, UserData> getUserData() {
+        return userData;
     }
 
     public static void saveXSCasinoModules() {
@@ -55,6 +63,24 @@ public class XSHandlers {
 
                 XSHandlers.xsCasinoUser.remove(p.getUniqueId());
             }
+        }
+    }
+
+    public static void loadUserData() {
+        for(Player p : Bukkit.getOnlinePlayers()) {
+            File pFile = new File(XSCasino.getPlugin().getDataFolder() + "/data", p.getUniqueId() + ".yml");
+
+            if(pFile.exists()) {
+                XSUser xsUser = new XSUser(p);
+
+                if(xsUser.getUserConfig().get("modules.lottery.data") != null) {
+                    xsUser.loadUserData();
+                }
+
+                XSHandlers.xsCasinoUser.put(p.getUniqueId(),xsUser);
+            }
+
+            XSHandlers.getUserData().put(p.getUniqueId(),new UserData(p));
         }
     }
 
@@ -81,10 +107,11 @@ public class XSHandlers {
     }
 
     public static void registerEvents() {
-        Bukkit.getPluginManager().registerEvents(new inventoryEvent(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new joinEvent(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new leaveEvent(), XSCasino.getPlugin());
+        Bukkit.getPluginManager().registerEvents(new ui_main_lottery(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new ui_topticket_lottery(), XSCasino.getPlugin());
+        Bukkit.getPluginManager().registerEvents(new ui_myticket_lottery(), XSCasino.getPlugin());
     }
 
     public static String convertTime(long millis) {

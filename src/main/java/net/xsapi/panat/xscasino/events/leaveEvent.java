@@ -19,5 +19,7 @@ public class leaveEvent implements Listener {
 
             XSHandlers.xsCasinoUser.remove(p.getUniqueId());
         }
+
+        XSHandlers.getUserData().remove(p.getUniqueId());
     }
 }

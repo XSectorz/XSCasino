@@ -57,6 +57,70 @@ configuration:
   pot_extra: 750 #per ticket buy
   prize_time: 20 #prize time in secs
 
+myTicket_configuration:
+  title: "&8My Tickets"
+  inventorySize: 54
+  nextSlot:
+    - 26
+  prevSlot:
+    - 18
+  emptySlot:
+    - 22
+  contentSlot:
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 28
+    - 29
+    - 30
+    - 31
+    - 32
+    - 33
+    - 34
+    - 37
+    - 38
+    - 39
+    - 40
+    - 41
+    - 42
+    - 43
+  backgroundSlot:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 17
+    - 18
+    - 26
+    - 27
+    - 35
+    - 36
+    - 44
+    - 45
+    - 46
+    - 47
+    - 48
+    - 51
+    - 52
+    - 53
+
 topTicket_configuration:
   title: "&8Top Tickets"
   inventorySize: 54
@@ -148,6 +212,36 @@ topTicket_contents:
     - "&r"
     - "&7มีจำนวนผู้ซื้อทั้งหมด : &x&F&F&D&9&0&0%ticketAmount% &7ใบ"
 
+myTicket_contents:
+  Material: "BOOK"
+  customModelData: 0
+  display: "&x&6&0&C&3&3&6ลอตเตอรี่หมายเลข : &x&F&F&D&9&0&0&l%ticketNum%"
+  lore:
+    - "&r"
+    - "&7มีจำนวนที่คุณซื้อ : &x&F&F&D&9&0&0%ticketAmount% &7ใบ"
+
+nextSlotAvaible_contents:
+  Material: "PAPER"
+  customModelData: 10219
+  display: "&x&6&0&C&3&3&6หน้าถัดไป"
+  lore: []
+nextSlotUnAvaible_contents:
+  Material: "PAPER"
+  customModelData: 10234
+  display: "&x&6&0&C&3&3&6หน้าถัดไป"
+  lore: []
+prevSlotAvaible_contents:
+  Material: "PAPER"
+  customModelData: 10218
+  display: "&x&6&0&C&3&3&6ย้อนกลับ"
+  lore: []
+prevSlotUnAvaible_contents:
+  Material: "PAPER"
+  customModelData: 10233
+  display: "&x&6&0&C&3&3&6ย้อนกลับ"
+  lore: []
+
+
 contents:
   info_current:
     Material: "PAPER"
@@ -189,6 +283,8 @@ contents:
       - "&r"
       - "&x&B&8&2&8&3&Aหมายเหตุ บรรทัดที่สองใส่หมายเลข 00-99"
       - "&x&B&8&2&8&3&A       บรรทัดที่สามใส่จำนวนลอตเตอรี่ที่ต้องการซื้อ"
+      - "&r"
+      - "&f &x&E&7&C&2&4&5เพื่อทำการซื้อลอตเตอรี่"
     slots:
       - 31
   top_ticket:
@@ -201,6 +297,8 @@ contents:
       - "&7จำนวนลอตเตอรี่ที่ได้รับความนิยมมากที่สุด"
       - "&7จะแสดงขึ้นในหน้าเมนูนี้เพื่อช่วยตัดสินใจ"
       - "&7ให้คุณว่าคุณจะเข้าร่วมส่วนมากหรือไม่"
+      - "&r"
+      - "&f &x&E&7&C&2&4&5เพื่อทำการตรวจสอบ"
     slots:
       - 34
   close:
@@ -226,8 +324,27 @@ contents:
       - "&x&B&8&2&8&3&Aวิธีการคำนวณรางวัล"
       - "&x&B&8&2&8&3&Aจะเป็นการแบ่งตามสัดส่วนของจำนวน"
       - "&x&B&8&2&8&3&Aตั๋วที่ถูกรางวัลยิ่งซื้อมากยิ่งได้มาก"
+      - "&r"
+      - "&&x&6&B&F&F&0&0สูตรการคำนวณยอดที่จะได้รับ"
+      - "&8▪ &x&C&8&F&F&0&0X = จำนวนยอดเงินรางวัลรวม"
+      - "&8▪ &x&C&8&F&F&0&0Y = จำนวนลอตเตอรี่ที่คุณถูกรางวัล"
+      - "&8▪ &x&C&8&F&F&0&0Z = จำนวนลอตเตอรี่ที่ถูกรางวัลทั้งหมด"
+      - "&&x&6&B&F&F&0&0➥ X*(Y/Z)"
     slots:
       - 50
+  my_lottery:
+    Material: "PAPER"
+    customModelData: 10223
+    amount: 1
+    display: "&x&E&7&C&2&4&5ลอตเตอรี่ของฉัน"
+    lore:
+      - "&r"
+      - "&7ตรวจสอบลอตเตอรี่ที่คุณทำการซื้อ"
+      - "&7ทุกหมายเลขได้ที่นี่เลย"
+      - "&r"
+      - "&f &x&E&7&C&2&4&5เพื่อทำการตรวจสอบลอตเตอรี่"
+    slots:
+      - 53
 
 top_ticket_contents:
   close:
@@ -244,7 +361,29 @@ top_ticket_contents:
     amount: 1
     display: "&x&E&7&C&2&4&5เกี่ยวกับระบบ"
     lore:
-      - "&asaa"
-      - "&asee"
+      - "&r"
+      - "&7ระบบจะแสดงหมายเลขลอตเตอรี่ที่ถูกซื้อมากที่สุด"
+      - "&7ในระยะเวลาของลอตเตอรี่รอบนั้นๆ"
+    slots:
+      - 50
+
+my_ticket_contents:
+  close:
+    Material: "PAPER"
+    customModelData: 10215
+    amount: 1
+    display: "&x&B&8&2&8&3&Aย้อนกลับ"
+    lore: []
+    slots:
+      - 49
+  info_system:
+    Material: "PAPER"
+    customModelData: 10237
+    amount: 1
+    display: "&x&E&7&C&2&4&5เกี่ยวกับระบบ"
+    lore:
+      - "&r"
+      - "&7ระบบจะแสดงลอตเตอรี่ที่คุณซื้อ"
+      - "&7ในระยะเวลาของลอตเตอรี่รอบนั้นๆ"
     slots:
       - 50
