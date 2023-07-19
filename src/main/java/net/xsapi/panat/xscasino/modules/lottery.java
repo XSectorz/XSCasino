@@ -1,7 +1,9 @@
 package net.xsapi.panat.xscasino.modules;
 
+import net.xsapi.panat.xscasino.configuration.messages;
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
+import net.xsapi.panat.xscasino.handlers.XSUtils;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -187,7 +189,13 @@ public class lottery extends XSCasinoTemplates {
                         str = ("0" + str);
                     }
 
-                    Bukkit.broadcastMessage("Lottery Prize Out! " + str);
+                   // Bukkit.broadcastMessage("Lottery Prize Out! " + str);
+                    for(Player p : Bukkit.getOnlinePlayers()) {
+                        String winMsg = messages.customConfig.getString("lottery_prize_annoucement")
+                                .replace("%number%",str).replace("%prize%",String.valueOf(getPotPrize()));
+
+                        XSUtils.sendReplaceComponents(p,winMsg);
+                    }
                     sendReward(prizeNum);
                 }
                 for(Map.Entry<UUID,Inventory> playerOpen : xsLotteryUserOpenUI.entrySet()) {
@@ -304,6 +312,18 @@ public class lottery extends XSCasinoTemplates {
         setNumberTicketWin(amountWinticket);
         setTicketWinNum(prizeNum);
         setTotalWinPrize((int) getPotPrize());
+        String winMsg = "";
+        if(winnerName.isEmpty()) {
+            winMsg = messages.customConfig.getString("lottery_prize_win")
+                    .replace("%player_winner%",messages.customConfig.getString("win_condition.no_data"));
+        } else {
+            winMsg = messages.customConfig.getString("lottery_prize_win")
+                    .replace("%player_winner%",winnerName);
+        }
+
+        for(Player p : Bukkit.getOnlinePlayers()) {
+            XSUtils.sendReplaceComponents(p,winMsg);
+        }
 
         for (Map.Entry<UUID,Integer> winner : lotteryWinner.entrySet()) {
             double prizePool = (double) winner.getValue()/amountWinticket;
