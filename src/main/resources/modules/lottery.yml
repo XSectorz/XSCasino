@@ -183,6 +183,9 @@ topTicket_configuration:
 
 data:
   lottery_list: []
+  lockPrize:
+    number: -1
+    setter: ""
   #template
   #winner:
   #  name: zTaiSiamz

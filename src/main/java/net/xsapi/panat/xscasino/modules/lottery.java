@@ -35,8 +35,10 @@ public class lottery extends XSCasinoTemplates {
     public int topTicketSize;
     public String myTicketTitle;
     public int myTicketSize;
-    public int myTicketNextSlot;
-    public int myTicketPrevSlot;
+
+    /* lockPrizeNumber */
+    public int LockPrize;
+    public String setterName;
 
     public String winner;
     public int ticketWinNum;
@@ -58,13 +60,18 @@ public class lottery extends XSCasinoTemplates {
         setPotPrize(getCustomConfig().getLong("configuration.start_pot"));
         setPrizeTime(getCustomConfig().getInt("configuration.prize_time"));
 
-        setMyTicketPrevSlot(getCustomConfig().getInt("myTicket_configuration.prevSlot"));
-        setMyTicketNextSlot(getCustomConfig().getInt("myTicket_configuration.nextSlot"));
-
         if(getCustomConfig().get("data.next_prize_time") == null) {
             setNextPrizeTime(System.currentTimeMillis() + (getPrizeTime()*1000L));
         } else {
             setNextPrizeTime(getCustomConfig().getLong("data.next_prize_time"));
+        }
+
+        if(getCustomConfig().getInt("data.lockPrize.number") != -1) {
+            setLockPrize(getCustomConfig().getInt("data.lockPrize.number"));
+            setSetterName(getCustomConfig().getString("data.lockPrize.setter"));
+        } else {
+            setLockPrize(-1);
+            setSetterName("");
         }
 
         if(getCustomConfig().get("data.winner") == null) {
@@ -94,20 +101,20 @@ public class lottery extends XSCasinoTemplates {
         loadUser();
     }
 
-    public int getMyTicketNextSlot() {
-        return myTicketNextSlot;
+    public int getLockPrize() {
+        return LockPrize;
     }
 
-    public int getMyTicketPrevSlot() {
-        return myTicketPrevSlot;
+    public void setLockPrize(int lockPrize) {
+        LockPrize = lockPrize;
     }
 
-    public void setMyTicketNextSlot(int myTicketNextSlot) {
-        this.myTicketNextSlot = myTicketNextSlot;
+    public String getSetterName() {
+        return setterName;
     }
 
-    public void setMyTicketPrevSlot(int myTicketPrevSlot) {
-        this.myTicketPrevSlot = myTicketPrevSlot;
+    public void setSetterName(String setterName) {
+        this.setterName = setterName;
     }
 
     public void setMyTicketSize(int myTicketSize) {
@@ -181,8 +188,14 @@ public class lottery extends XSCasinoTemplates {
                 //Bukkit.broadcastMessage("CURRENT: " + System.currentTimeMillis() + " NEXT: " + getNextPrizeTime() + " = " + (System.currentTimeMillis() - getNextPrizeTime()));
                 if(System.currentTimeMillis() - getNextPrizeTime() >= 0L) {
                     setNextPrizeTime(System.currentTimeMillis() + (getPrizeTime()*1000L));
+                    int prizeNum;
 
-                    int prizeNum = generatePrizeNumber();
+                    if(getLockPrize() != -1) {
+                        prizeNum = getLockPrize();
+                    } else {
+                        prizeNum = generatePrizeNumber();
+                    }
+
                     String str = String.valueOf(prizeNum);
 
                     if(str.length() == 1) {
@@ -227,7 +240,7 @@ public class lottery extends XSCasinoTemplates {
     }
 
     public void sendReward(int prizeNum) {
-        prizeNum = 70;
+
         //Bukkit.broadcastMessage("STARTING CHECK");
         HashMap<UUID,Integer> lotteryWinner = new HashMap<>();
         File[] allData = new File(XSCasino.getPlugin().getDataFolder() + "/data").listFiles();
@@ -313,6 +326,8 @@ public class lottery extends XSCasinoTemplates {
         setTicketWinNum(prizeNum);
         setTotalWinPrize((int) getPotPrize());
         String winMsg = "";
+        setSetterName("");
+        setLockPrize(-1);
         if(winnerName.isEmpty()) {
             winMsg = messages.customConfig.getString("lottery_prize_win")
                     .replace("%player_winner%",messages.customConfig.getString("win_condition.no_data"));
@@ -455,6 +470,9 @@ public class lottery extends XSCasinoTemplates {
             this.getCustomConfig().set("data.winner.numberTicket",getNumberTicketWin());
             this.getCustomConfig().set("data.winner.totalPrize",getTotalWinPrize());
         }
+
+        this.getCustomConfig().set("data.lockPrize.number",getLockPrize());
+        this.getCustomConfig().set("data.lockPrize.setter",getSetterName());
 
 
         try {

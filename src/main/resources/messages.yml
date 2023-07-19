@@ -1,5 +1,6 @@
 prefix: "<gradient:#D5A233:#DBA121:#E49D1B:#C36A16><bold>XSCasino</bold></gradient> <dark_gray>▸ <white>"
 no_permission: "%prefix% <color:#D53354>คุณไม่มีสิทธิในการใช้งานคำสั่งดังกล่าว"
+no_command: "%prefix% <color:#D53354>ไม่พบคำสั่งดังกล่าวในระบบพิมพ์ /xscasino help"
 commands_list:
   - "<gradient:#D326DD:#C221DB:#DB4F07:#B8A120><bold>»————————————◦•♛•◦————————————«</bold></gradient>"
   - ""
@@ -17,6 +18,7 @@ bought_success: "%prefix% <color:#E7D049>ทำการซื้อลอตเ
 not_in_range: "%prefix% <color:#D53354>กรุณาพิมพ์เลขของลอตเตอรี่ให้อยู่ในช่วง 00-99 "
 lottery_prize_annoucement: "%prefix% <color:#E7D049>ลอตเตอรี่ได้ทำการประกาศรางวัลแล้วเลขที่ชนะคือ <color:#41FF00><bold>%number%</bold></color> <color:#E7D049>ซึ่งมีมูลค่ารางวัลรวมกว่า <gradient:#FFC400:#FFE722:#F1DF77><bold>%prize%</bold></gradient> <white>"
 lottery_prize_win: "%prefix% <color:#E7D049>ผู้ที่ได้รับรางวัลมากที่สุดคือ <gradient:#FFC400:#FFE722:#F1DF77>%player_winner%"
+set_lock_success: "%prefix% <color:#E7D049>ทำการตั้งค่าเลขลอตเตอรี่เรียบร้อยแล้ว"
 win_condition:
   no_data: "ไม่มีผู้โชคดีเลย..."
 time: #use normal color like (&6 &a &e or Hex color)
