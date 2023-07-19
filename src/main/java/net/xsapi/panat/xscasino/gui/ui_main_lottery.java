@@ -126,12 +126,12 @@ public class ui_main_lottery implements Listener {
             else if(XSHandlers.XSLottery.getCustomConfig().getStringList("contents.buy_ticket.slots").contains(String.valueOf(e.getSlot()))) {
                 p.closeInventory();
                 new SignGUI()
-                        .lines("§6พิมพ์เลข/จำนวน", "69", "1", "§6^^^^^^^^^^^")
+                        .lines("§6พิมพ์เลข/จำนวน", "69", "-1", "§6^^^^^^^^^^^")
                         .type(Material.DARK_OAK_SIGN)
                         .color(DyeColor.YELLOW)
                         .stripColor()
                         .onFinish((lines) -> {
-                            if (!lines[1].isEmpty() && !lines[2].isEmpty()) {
+                            if (!lines[1].isEmpty() && !lines[2].isEmpty() && !lines[2].equalsIgnoreCase("-1")) {
                                 int ticket = Integer.parseInt(lines[1]);
                                 int amount = 0;
 
