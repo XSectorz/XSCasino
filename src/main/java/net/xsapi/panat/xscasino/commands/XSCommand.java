@@ -4,6 +4,7 @@ import net.kyori.adventure.audience.Audience;
 import net.xsapi.panat.xscasino.gui.ui_main_lottery;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
 import net.xsapi.panat.xscasino.handlers.XSUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -66,6 +67,18 @@ public class XSCommand implements CommandExecutor {
                 }
 
                 XSUtils.sendMessages(sender,"no_command");
+            }
+        } else {
+            if (command.getName().equalsIgnoreCase("xscasino")) {
+                if(args.length == 2) {
+                    if(args[0].equalsIgnoreCase("lottery")) {
+                        if(Bukkit.getPlayer(args[1].toString()) != null) {
+                            Player p = Bukkit.getPlayer(args[1].toString());
+
+                            ui_main_lottery.openLotteryGUI(p);
+                        }
+                    }
+                }
             }
         }
 
