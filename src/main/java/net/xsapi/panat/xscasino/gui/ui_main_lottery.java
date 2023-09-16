@@ -52,7 +52,7 @@ public class ui_main_lottery implements Listener {
 
     public static void updateInventoryContents(Inventory inv,Player p) {
 
-        String currTime = XSHandlers.convertTime(Math.abs(System.currentTimeMillis()-XSHandlers.XSLottery.getNextPrizeTime()));
+        String currTime = XSUtils.convertTime(Math.abs(System.currentTimeMillis()-XSHandlers.XSLottery.getNextPrizeTime()));
 
         String winner = "";
         String number = "";

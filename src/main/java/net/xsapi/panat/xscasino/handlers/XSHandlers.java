@@ -40,6 +40,7 @@ public class XSHandlers {
     private static String PASS;
     private static String DB_TABLE;
     private static String TABLE_LOTTERY = "xscasino_lottery";
+    private static String TABLE_XSPLAYER = "xscasino_user";
 
     public static lottery XSLottery;
     public static HashMap<UUID, XSUser> xsCasinoUser = new HashMap<>();
@@ -76,6 +77,9 @@ public class XSHandlers {
     public static String getTableLottery() {
         return TABLE_LOTTERY;
     }
+    public static String getTableXSPlayer() {
+        return TABLE_XSPLAYER;
+    }
 
 
     public static void setupDefault() {
@@ -100,7 +104,37 @@ public class XSHandlers {
             JDBC_URL = "jdbc:mysql://" + host +  "/" + DB_TABLE;
             USER = config.customConfig.getString("database.user");
             PASS = config.customConfig.getString("database.password");
+            createUserTable();
+        }
+    }
 
+    private static void createUserTable() {
+        try {
+            Connection connection = DriverManager.getConnection(JDBC_URL,USER,PASS);
+
+            DatabaseMetaData metaData = connection.getMetaData();
+            ResultSet resultSet = metaData.getTables(null, null, getTableXSPlayer(), null);
+            boolean tableExists = resultSet.next();
+
+            if(!tableExists) {
+                Statement statement = connection.createStatement();
+
+                String createTableQuery = "CREATE TABLE " + getTableXSPlayer() + " ("
+                        + "id INT PRIMARY KEY AUTO_INCREMENT, "
+                        + "UUID VARCHAR(36), "
+                        + "playerName VARCHAR(16), "
+                        + "lotteryList TEXT"
+                        + ")";
+
+                statement.executeUpdate(createTableQuery);
+                statement.close();
+            }
+            connection.close();
+
+            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Player Database : §x§6§0§F§F§0§0Connected");
+        } catch (SQLException e) {
+            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Player Database : §x§C§3§0§C§2§ANot Connected");
+            e.printStackTrace();
         }
     }
 
@@ -188,35 +222,54 @@ public class XSHandlers {
 
     public static void saveUserData() {
         for(Player p : Bukkit.getOnlinePlayers()) {
-            if(XSHandlers.xsCasinoUser.containsKey(p.getUniqueId())) {
 
-                XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
-
-                ArrayList<String> lotteryList = new ArrayList<>();
-                for(Map.Entry<Integer,Integer> lottery : xsUser.getLottery().entrySet()) {
-                    lotteryList.add(lottery.getKey()+":"+lottery.getValue());
+            if(getUsingSQL()) {
+                if(XSHandlers.xsCasinoUser.containsKey(p.getUniqueId())) {
+                    XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
+                    ArrayList<String> lotteryList = new ArrayList<>();
+                    for(Map.Entry<Integer,Integer> lottery : xsUser.getLottery().entrySet()) {
+                        lotteryList.add(lottery.getKey()+":"+lottery.getValue());
+                    }
+                    xsUser.saveUserSQL(lotteryList);
+                    Bukkit.getLogger().info("Saved " + p.getName() + " via SQL");
                 }
-                xsUser.getUserConfig().set("modules.lottery.data",lotteryList);
+            } else {
+                if(XSHandlers.xsCasinoUser.containsKey(p.getUniqueId())) {
 
-                xsUser.saveData();
+                    XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
 
-                XSHandlers.xsCasinoUser.remove(p.getUniqueId());
+                    ArrayList<String> lotteryList = new ArrayList<>();
+                    for(Map.Entry<Integer,Integer> lottery : xsUser.getLottery().entrySet()) {
+                        lotteryList.add(lottery.getKey()+":"+lottery.getValue());
+                    }
+                    xsUser.getUserConfig().set("modules.lottery.data",lotteryList);
+
+                    xsUser.saveData();
+
+                    XSHandlers.xsCasinoUser.remove(p.getUniqueId());
+                }
             }
         }
     }
 
     public static void loadUserData() {
         for(Player p : Bukkit.getOnlinePlayers()) {
-            File pFile = new File(XSCasino.getPlugin().getDataFolder() + "/data", p.getUniqueId() + ".yml");
 
-            if(pFile.exists()) {
+            if(getUsingSQL()) {
                 XSUser xsUser = new XSUser(p);
-
-                if(xsUser.getUserConfig().get("modules.lottery.data") != null) {
-                    xsUser.loadUserData();
-                }
-
                 XSHandlers.xsCasinoUser.put(p.getUniqueId(),xsUser);
+            } else {
+                File pFile = new File(XSCasino.getPlugin().getDataFolder() + "/data", p.getUniqueId() + ".yml");
+
+                if(pFile.exists()) {
+                    XSUser xsUser = new XSUser(p);
+
+                    if(xsUser.getUserConfig().get("modules.lottery.data") != null) {
+                        xsUser.loadUserData();
+                    }
+
+                    XSHandlers.xsCasinoUser.put(p.getUniqueId(),xsUser);
+                }
             }
 
             XSHandlers.getUserData().put(p.getUniqueId(),new UserData(p));
@@ -251,55 +304,6 @@ public class XSHandlers {
         Bukkit.getPluginManager().registerEvents(new ui_main_lottery(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new ui_topticket_lottery(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new ui_myticket_lottery(), XSCasino.getPlugin());
-    }
-
-    public static String convertTime(long millis) {
-        int seconds = (int) (millis / 1000) % 60;
-        int minutes = (int) ((millis / (1000 * 60)) % 60);
-        int hours = (int) ((millis / (1000 * 60 * 60)) % 24);
-        long days = millis / (1000 * 60 * 60 * 24);
-
-        String timer = "";
-
-        if(days >= 1) {
-            timer += days;
-            if(days == 1) {
-                timer += " " + XSUtils.getMessagesConfig("time.day") + " ";
-            } else {
-                timer += " " + XSUtils.getMessagesConfig("time.days") + " ";
-            }
-        }
-        if(hours >= 1) {
-            timer += hours;
-            if(hours == 1) {
-                timer += " " + XSUtils.getMessagesConfig("time.hour") + " ";
-            } else {
-                timer += " " + XSUtils.getMessagesConfig("time.hours") + " ";
-            }
-        }
-        if(minutes >= 1) {
-            timer += minutes;
-            if(minutes == 1) {
-                timer += " " + XSUtils.getMessagesConfig("time.minute") + " ";
-            } else {
-                timer += " " + XSUtils.getMessagesConfig("time.minutes") + " ";
-            }
-        }
-
-        if(seconds >= 1) {
-            timer += seconds;
-            if(minutes == 1) {
-                timer += " " + XSUtils.getMessagesConfig("time.second") + " ";
-            } else {
-                timer += " " + XSUtils.getMessagesConfig("time.seconds") + " ";
-            }
-        }
-
-        if(timer.length() == 0) {
-            timer += XSUtils.getMessagesConfig("time.soon");
-        }
-
-        return timer;
     }
 
 

@@ -2,12 +2,15 @@ package net.xsapi.panat.xscasino.user;
 
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,8 +23,18 @@ public class XSUser {
 
     public XSUser(Player p) {
         this.p = p;
-        this.userFile = new File(XSCasino.getPlugin().getDataFolder() + "/data", p.getUniqueId() + ".yml");
-        this.userConfig = YamlConfiguration.loadConfiguration(this.userFile);
+
+        if(XSHandlers.getUsingSQL()) {
+            createUserSQL();
+            loadSQLUserData();
+        } else {
+            this.userFile = new File(XSCasino.getPlugin().getDataFolder() + "/data", p.getUniqueId() + ".yml");
+            this.userConfig = YamlConfiguration.loadConfiguration(this.userFile);
+        }
+    }
+
+    public Player getPlayer() {
+        return p;
     }
 
     public void createUser() {
@@ -33,12 +46,99 @@ public class XSUser {
         saveData();
     }
 
-    public void loadUserData() {
-        for(String lottery : this.userConfig.getStringList("modules.lottery.data")) {
-            int ticket = Integer.parseInt(lottery.split(":")[0]);
-            int amount = Integer.parseInt(lottery.split(":")[1]);
+    public void createUserSQL() {
+        try {
+            Connection connection = DriverManager.getConnection(XSHandlers.getJDBC_URL(),XSHandlers.getUSER(),XSHandlers.getPASS());
 
-            getLottery().put(ticket,amount);
+            String checkPlayerQuery = "SELECT EXISTS(SELECT * FROM " + XSHandlers.getTableXSPlayer() + " WHERE playerName = ?) AS exist";
+            PreparedStatement preparedStatement = connection.prepareStatement(checkPlayerQuery);
+            preparedStatement.setString(1, p.getName());
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                boolean exists = resultSet.getBoolean("exist");
+
+                if (!exists) {
+                    String insertQuery = "INSERT INTO " + XSHandlers.getTableXSPlayer() + " (UUID, playerName, lotteryList) "
+                            + "VALUES (?, ?, ?)";
+
+                    try (PreparedStatement preparedStatementInsert = connection.prepareStatement(insertQuery)) {
+                        preparedStatementInsert.setString(1, String.valueOf(p.getUniqueId()));
+                        preparedStatementInsert.setString(2, p.getName());
+                        preparedStatementInsert.setString(3, "[]");
+                        preparedStatementInsert.executeUpdate();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+            connection.close();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void loadSQLUserData() {
+        try {
+            Connection connection = DriverManager.getConnection(XSHandlers.getJDBC_URL(),XSHandlers.getUSER(),XSHandlers.getPASS());
+
+            String selectQuery = "SELECT * FROM " + XSHandlers.getTableXSPlayer() + " WHERE playername = ?";;
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                preparedStatement.setString(1, p.getName());
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String lotteryList = resultSet.getString("lotteryList");
+                        if(!lotteryList.equalsIgnoreCase("[]") && !lotteryList.isEmpty()) {
+
+                            lotteryList = lotteryList.replaceAll("\\[|\\]", "");
+                            String[] dataArray = lotteryList.split(",");
+
+                            ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(dataArray));
+                            for (String lottery : arrayList) {
+                                int key = Integer.parseInt(lottery.trim().split(":")[0]);
+                                int amount = Integer.parseInt(lottery.trim().split(":")[1]);
+                                getLottery().put(key,amount);
+                            }
+                            Bukkit.getLogger().info("Load lottery success");
+                        }
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void loadUserData() {
+
+        if(XSHandlers.getUsingSQL()) {
+            loadSQLUserData();
+        } else {
+            for(String lottery : this.userConfig.getStringList("modules.lottery.data")) {
+                int ticket = Integer.parseInt(lottery.split(":")[0]);
+                int amount = Integer.parseInt(lottery.split(":")[1]);
+
+                getLottery().put(ticket,amount);
+            }
+        }
+
+    }
+
+    public void saveUserSQL(ArrayList<String> lotteryData) {
+        try (Connection connection = DriverManager.getConnection(XSHandlers.getJDBC_URL(), XSHandlers.getUSER(), XSHandlers.getPASS())) {
+            String updateQuery = "UPDATE " + XSHandlers.getTableXSPlayer() + " SET lotteryList = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+                preparedStatement.setString(1, lotteryData.toString());
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -48,8 +148,13 @@ public class XSUser {
         for(Map.Entry<Integer,Integer> lottery : this.getLottery().entrySet()) {
             lotteryList.add(lottery.getKey()+":"+lottery.getValue());
         }
-        this.getUserConfig().set("modules.lottery.data",lotteryList);
-        this.saveData();
+
+        if(XSHandlers.getUsingSQL()) {
+            saveUserSQL(lotteryList);
+        } else {
+            this.getUserConfig().set("modules.lottery.data",lotteryList);
+            this.saveData();
+        }
     }
 
     public void saveData() {

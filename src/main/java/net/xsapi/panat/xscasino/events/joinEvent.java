@@ -17,15 +17,21 @@ public class joinEvent implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
 
-        File pFile = new File(XSCasino.getPlugin().getDataFolder() + "/data", p.getUniqueId() + ".yml");
 
-        if(pFile.exists()) {
-            XSUser xsUser = new XSUser(p);
+        if(!XSHandlers.getUsingSQL()) {
+            File pFile = new File(XSCasino.getPlugin().getDataFolder() + "/data", p.getUniqueId() + ".yml");
 
-            if(xsUser.getUserConfig().get("modules.lottery.data") != null) {
-                xsUser.loadUserData();
+            if(pFile.exists()) {
+                XSUser xsUser = new XSUser(p);
+
+                if(xsUser.getUserConfig().get("modules.lottery.data") != null) {
+                    xsUser.loadUserData();
+                }
+
+                XSHandlers.xsCasinoUser.put(p.getUniqueId(),xsUser);
             }
-
+        } else {
+            XSUser xsUser = new XSUser(p);
             XSHandlers.xsCasinoUser.put(p.getUniqueId(),xsUser);
         }
 

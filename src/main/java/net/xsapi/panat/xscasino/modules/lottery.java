@@ -184,7 +184,6 @@ public class lottery extends XSCasinoTemplates {
 
         setPotPrize((long) (getPotPrize() + getAmountTicket()*getPotExtra()));
         createTask();
-        loadUser();
     }
 
     public void loadDataSQL(String JDBC_URL,String USER,String PASS) {
@@ -292,6 +291,26 @@ public class lottery extends XSCasinoTemplates {
             }
         }
     }
+
+    public void resetPlayerData(String JDBC_URL,String USER,String PASS) {
+        try {
+            Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASS);
+
+            String updateQuery = "UPDATE " + XSHandlers.getTableXSPlayer() + " SET lotteryList = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
+            preparedStatement.setString(1, "[]");
+            preparedStatement.executeUpdate();
+
+            preparedStatement.close();
+            connection.close();
+
+            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSAPI Casino] Lottery Database : §x§6§0§F§F§0§0Reset!");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void saveTOSQL(String JDBC_URL,String USER,String PASS,ArrayList<String> lotteryData) {
         try {
@@ -412,104 +431,102 @@ public class lottery extends XSCasinoTemplates {
 
     }
 
-    public void loadUser() {
-        for(Player p : Bukkit.getOnlinePlayers()) {
-            File pFile = new File(XSCasino.getPlugin().getDataFolder() + "/data", p.getUniqueId() + ".yml");
-
-            if(pFile.exists()) {
-                XSUser xsUser = new XSUser(p);
-
-                if(xsUser.getUserConfig().get("modules.lottery.data") != null) {
-                    xsUser.loadUserData();
-                }
-                XSHandlers.xsCasinoUser.put(p.getUniqueId(),xsUser);
-            }
-        }
-        //Bukkit.broadcastMessage("-------------------");
-        //for(Map.Entry<UUID,XSUser> xsPlayer : XSHandlers.xsCasinoUser.entrySet()) {
-        //    Bukkit.broadcastMessage("UUID: " + xsPlayer.getKey());
-        //}
-        //Bukkit.broadcastMessage("-------------------");
-    }
-
     public void sendReward(int prizeNum) {
 
         //Bukkit.broadcastMessage("STARTING CHECK");
         HashMap<UUID,Integer> lotteryWinner = new HashMap<>();
-        File[] allData = new File(XSCasino.getPlugin().getDataFolder() + "/data").listFiles();
-
         int amountWinticket = 0;
-
         String winnerName = "";
         int MaxAmountOfTicket = 0;
-      //  Bukkit.broadcastMessage("-------------------");
-      //  for(Map.Entry<UUID,XSUser> xsPlayer : XSHandlers.xsCasinoUser.entrySet()) {
-      //     Bukkit.broadcastMessage("UUID: " + xsPlayer.getKey());
-      //      for(Map.Entry<Integer,Integer> ticket : xsPlayer.getValue().getLottery().entrySet()) {
-      //          Bukkit.broadcastMessage("TICKET : " + ticket.getKey() + " x" + ticket.getValue());
-      //      }
-      //  }
-      //  Bukkit.broadcastMessage("-------------------");
-        if(allData != null) {
-            for (File file : allData) {
-                if(file.getName().endsWith(".yml")) {
-                    FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
-                    UUID uuid = UUID.fromString(file.getName().replace(".yml",""));
-                  //  Bukkit.broadcastMessage("FILE_NAME: " + uuid.toString());
-                    XSUser xsUser = null;
-                    if(XSHandlers.xsCasinoUser.containsKey(uuid)) {
 
-                        xsUser = XSHandlers.xsCasinoUser.get(uuid);
-                        ArrayList<String> lotteryList = new ArrayList<>();
-                        if(xsUser.getLottery().size() != 0) {
-                           // Bukkit.broadcastMessage("LOOP: " + xsUser.getLottery().size());
-                            for(Map.Entry<Integer,Integer> lottery : xsUser.getLottery().entrySet()) {
-                                lotteryList.add(lottery.getKey()+":"+lottery.getValue());
-                            }
-                            xsUser.getUserConfig().set("modules.lottery.data",lotteryList);
-                            xsUser.saveData();
-                        } else {
-                            //Bukkit.broadcastMessage("ZERO TICKET");
+        if(XSHandlers.getUsingSQL()) {
+            //Check only online players
+            for(Map.Entry<UUID,XSUser> userList : XSHandlers.xsCasinoUser.entrySet()) {
+                if(!userList.getValue().getLottery().isEmpty()) {
+                    if(userList.getValue().getLottery().containsKey(prizeNum)) {
+                        int amt = userList.getValue().getLottery().get(prizeNum);
+                        amountWinticket += amt;
+                        lotteryWinner.put(userList.getKey(),amt);
+                        if(amt > MaxAmountOfTicket) {
+                            MaxAmountOfTicket = amt;
+                            winnerName = userList.getValue().getPlayer().getName();
                         }
-
-                        file = xsUser.getUserFile();
-                        fileConfig = xsUser.getUserConfig();
-                    } else {
-                        //Bukkit.broadcastMessage("NULL");
                     }
+                    userList.getValue().getLottery().clear();
+                }
+            }
+        } else {
+            File[] allData = new File(XSCasino.getPlugin().getDataFolder() + "/data").listFiles();
 
-                    if(fileConfig.get("modules.lottery.data") != null) {
-                        //Bukkit.broadcastMessage("NOT NULL -> " + fileConfig.getStringList("modules.lottery.data").size());
-                        for(String lottery : fileConfig.getStringList("modules.lottery.data")) {
-                            int ticket = Integer.parseInt(lottery.split(":")[0]);
-                            int amount = Integer.parseInt(lottery.split(":")[1]);
-                            //Bukkit.broadcastMessage("TICKET: " + ticket + " | " + prizeNum);
-                            if(ticket == prizeNum) {
-                               // Bukkit.broadcastMessage("ADD!");
-                                lotteryWinner.put(uuid,amount);
-                                amountWinticket += amount;
+            //  Bukkit.broadcastMessage("-------------------");
+            //  for(Map.Entry<UUID,XSUser> xsPlayer : XSHandlers.xsCasinoUser.entrySet()) {
+            //     Bukkit.broadcastMessage("UUID: " + xsPlayer.getKey());
+            //      for(Map.Entry<Integer,Integer> ticket : xsPlayer.getValue().getLottery().entrySet()) {
+            //          Bukkit.broadcastMessage("TICKET : " + ticket.getKey() + " x" + ticket.getValue());
+            //      }
+            //  }
+            //  Bukkit.broadcastMessage("-------------------");
+            if(allData != null) {
+                for (File file : allData) {
+                    if(file.getName().endsWith(".yml")) {
+                        FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
+                        UUID uuid = UUID.fromString(file.getName().replace(".yml",""));
+                        //  Bukkit.broadcastMessage("FILE_NAME: " + uuid.toString());
+                        XSUser xsUser = null;
+                        if(XSHandlers.xsCasinoUser.containsKey(uuid)) {
 
-                                if(amount > MaxAmountOfTicket) {
-                                    MaxAmountOfTicket = amount;
-                                    winnerName = fileConfig.getString("AccountName");
+                            xsUser = XSHandlers.xsCasinoUser.get(uuid);
+                            ArrayList<String> lotteryList = new ArrayList<>();
+                            if(xsUser.getLottery().size() != 0) {
+                                // Bukkit.broadcastMessage("LOOP: " + xsUser.getLottery().size());
+                                for(Map.Entry<Integer,Integer> lottery : xsUser.getLottery().entrySet()) {
+                                    lotteryList.add(lottery.getKey()+":"+lottery.getValue());
                                 }
-                            }
-
-                            if(XSHandlers.xsCasinoUser.containsKey(uuid)) {
-                                xsUser.getUserConfig().set("modules.lottery.data",new ArrayList<>());
+                                xsUser.getUserConfig().set("modules.lottery.data",lotteryList);
                                 xsUser.saveData();
-                                xsUser.getLottery().clear();
                             } else {
-                                fileConfig.set("modules.lottery.data",new ArrayList<>());
-                                try {
-                                    fileConfig.save(file);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                                //Bukkit.broadcastMessage("ZERO TICKET");
+                            }
+
+                            file = xsUser.getUserFile();
+                            fileConfig = xsUser.getUserConfig();
+                        } else {
+                            //Bukkit.broadcastMessage("NULL");
+                        }
+
+                        if(fileConfig.get("modules.lottery.data") != null) {
+                            //Bukkit.broadcastMessage("NOT NULL -> " + fileConfig.getStringList("modules.lottery.data").size());
+                            for(String lottery : fileConfig.getStringList("modules.lottery.data")) {
+                                int ticket = Integer.parseInt(lottery.split(":")[0]);
+                                int amount = Integer.parseInt(lottery.split(":")[1]);
+                                //Bukkit.broadcastMessage("TICKET: " + ticket + " | " + prizeNum);
+                                if(ticket == prizeNum) {
+                                    // Bukkit.broadcastMessage("ADD!");
+                                    lotteryWinner.put(uuid,amount);
+                                    amountWinticket += amount;
+
+                                    if(amount > MaxAmountOfTicket) {
+                                        MaxAmountOfTicket = amount;
+                                        winnerName = fileConfig.getString("AccountName");
+                                    }
+                                }
+
+                                if(XSHandlers.xsCasinoUser.containsKey(uuid)) {
+                                    xsUser.getUserConfig().set("modules.lottery.data",new ArrayList<>());
+                                    xsUser.saveData();
+                                    xsUser.getLottery().clear();
+                                } else {
+                                    fileConfig.set("modules.lottery.data",new ArrayList<>());
+                                    try {
+                                        fileConfig.save(file);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         }
+                        //Bukkit.broadcastMessage("------------");
                     }
-                    //Bukkit.broadcastMessage("------------");
                 }
             }
         }
@@ -521,6 +538,7 @@ public class lottery extends XSCasinoTemplates {
         String winMsg = "";
         setSetterName("");
         setLockPrize(-1);
+        resetPlayerData(XSHandlers.getJDBC_URL(),XSHandlers.getUSER(),XSHandlers.getPASS());
         if(winnerName.isEmpty()) {
             winMsg = messages.customConfig.getString("lottery_prize_win")
                     .replace("%player_winner%",messages.customConfig.getString("win_condition.no_data"));
