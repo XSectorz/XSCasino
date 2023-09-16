@@ -1,0 +1,17 @@
+redis:
+  enable: false
+  host: localhost
+  port: 6379
+  password: ''
+
+database:
+  enable: false
+  host: localhost
+  port: 3306
+  dbTable: xscasino
+  user: root
+  password: password
+
+cross-server:
+  server-name: "Sync/01" #Put your server name here
+  parent-name: "SyncHost/01" #Get This From XSCasinoRedis.jar

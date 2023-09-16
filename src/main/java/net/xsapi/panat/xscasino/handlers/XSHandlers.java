@@ -2,6 +2,7 @@ package net.xsapi.panat.xscasino.handlers;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
+import net.xsapi.panat.xscasino.configuration.config;
 import net.xsapi.panat.xscasino.configuration.lotteryConfig;
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.events.joinEvent;
@@ -15,14 +16,30 @@ import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPubSub;
 
 import java.io.File;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class XSHandlers {
+
+    //Redis Connnection
+    private static boolean usingRedis = false;
+    private static String hostRedis;
+    private static String localRedis;
+
+    //MySQL Connection
+    private static boolean usingSQL = false;
+    private static String JDBC_URL;
+    private static String USER;
+    private static String PASS;
+    private static String DB_TABLE;
+    private static String TABLE_LOTTERY = "xscasino_lottery";
 
     public static lottery XSLottery;
     public static HashMap<UUID, XSUser> xsCasinoUser = new HashMap<>();
@@ -31,10 +48,132 @@ public class XSHandlers {
     private static Economy econ = null;
     private static Permission perms = null;
 
-    public static void loadXSCasinoModules() {
+    public static String getRedisHost() {
+        return hostRedis;
+    }
 
+    public static boolean getUsingRedis() {
+        return usingRedis;
+    }
+
+    public static String getLocalRedis() {
+        return localRedis;
+    }
+
+    public static boolean getUsingSQL() { return usingSQL; }
+    public static String getJDBC_URL() {
+        return JDBC_URL;
+    }
+
+    public static String getUSER() {
+        return USER;
+    }
+
+    public static String getPASS() {
+        return PASS;
+    }
+
+    public static String getTableLottery() {
+        return TABLE_LOTTERY;
+    }
+
+
+    public static void setupDefault() {
+        usingRedis = config.customConfig.getBoolean("redis.enable");
+        usingSQL = config.customConfig.getBoolean("database.enable");
+        hostRedis = config.customConfig.getString("cross-server.server-name");
+        localRedis = config.customConfig.getString("cross-server.parent-name");
+
+        if(usingRedis) {
+            if(redisConnection()) {
+                localRedis = config.customConfig.getString("cross-server.server-name");
+                hostRedis = config.customConfig.getString("cross-server.parent-name");
+
+                //subscribeToChannelAsync("LoginEvent/"+core.getLocalRedis());
+                //subscribeToChannelAsync("XSEventRedisData/"+core.getRedisHost());
+            }
+        }
+
+        if(usingSQL) {
+            String host = config.customConfig.getString("database.host");
+            DB_TABLE = config.customConfig.getString("database.dbTable");
+            JDBC_URL = "jdbc:mysql://" + host +  "/" + DB_TABLE;
+            USER = config.customConfig.getString("database.user");
+            PASS = config.customConfig.getString("database.password");
+
+        }
+    }
+
+    private static void subscribeToChannelAsync(String channelName) {
+        String redisHost = config.customConfig.getString("redis.host");
+        int redisPort = config.customConfig.getInt("redis.port");
+        String password = config.customConfig.getString("redis.password");
+        new Thread(() -> {
+            try (Jedis jedis = new Jedis(redisHost, redisPort)) {
+                if(!password.isEmpty()) {
+                    jedis.auth(password);
+                }
+                JedisPubSub jedisPubSub = new JedisPubSub() {
+                    @Override
+                    public void onMessage(String channel, String message) {
+                        if(channel.equalsIgnoreCase("LoginEvent")) {
+
+                        }
+                    }
+                };
+                jedis.subscribe(jedisPubSub, channelName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    public void sendMessageToRedisAsync(String CHName,String message) {
+        String redisHost = config.customConfig.getString("redis.host");
+        int redisPort = config.customConfig.getInt("redis.port");
+        String password = config.customConfig.getString("redis.password");
+
+        new Thread(() -> {
+            try (Jedis jedis = new Jedis(redisHost, redisPort)) {
+                if(!password.isEmpty()) {
+                    jedis.auth(password);
+                }
+                jedis.publish(CHName, message);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+
+    private static boolean redisConnection() {
+        String redisHost = config.customConfig.getString("redis.host");
+        int redisPort = config.customConfig.getInt("redis.port");
+        String password = config.customConfig.getString("redis.password");
+
+        try {
+            Jedis jedis = new Jedis(redisHost, redisPort);
+            if(!password.isEmpty()) {
+                jedis.auth(password);
+            }
+            jedis.close();
+            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Redis Server : §x§6§0§F§F§0§0Connected");
+            return true;
+        } catch (Exception e) {
+            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Redis Server : §x§C§3§0§C§2§ANot Connected");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static void loadXSCasinoModules() {
         Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f[XSCasino] trying to load data...");
         XSLottery = new lottery(lotteryConfig.customConfigFile,lotteryConfig.customConfig);
+
+        if(getUsingSQL()) {
+            XSLottery.createSQL(getJDBC_URL(),getUSER(),getPASS());
+        }
+
         Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f[XSCasino] loaded §x§6§0§F§F§0§0100% §x§f§f§a§c§2§fcomplete!");
 
     }

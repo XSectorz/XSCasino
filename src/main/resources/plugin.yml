@@ -2,7 +2,7 @@ name: XSCasino
 version: '${project.version}'
 main: net.xsapi.panat.xscasino.core.XSCasino
 api-version: 1.20
-depend: [ Vault ]
+softdepend: [ Vault ]
 commands:
   xscasino:
     description: "Main Command"

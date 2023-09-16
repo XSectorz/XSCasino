@@ -1,6 +1,7 @@
 package net.xsapi.panat.xscasino.core;
 
 import net.xsapi.panat.xscasino.commands.XSCommand;
+import net.xsapi.panat.xscasino.configuration.config;
 import net.xsapi.panat.xscasino.configuration.configLoader;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
 import org.bukkit.Bukkit;
@@ -14,6 +15,7 @@ public final class XSCasino extends JavaPlugin {
         return plugin;
     }
 
+
     @Override
     public void onEnable() {
         Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f******************************");
@@ -25,8 +27,12 @@ public final class XSCasino extends JavaPlugin {
 
         plugin = this;
 
+
         new configLoader();
+
         XSHandlers.setupAPI();
+        XSHandlers.setupDefault();
+
         XSHandlers.loadXSCasinoModules();
         XSHandlers.registerEvents();
         XSHandlers.loadUserData();

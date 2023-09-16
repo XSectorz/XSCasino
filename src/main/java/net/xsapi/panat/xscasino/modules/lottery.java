@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import java.io.File;
+import java.sql.*;
 import java.util.*;
 
 import static net.xsapi.panat.xscasino.gui.ui_main_lottery.updateInventory;
@@ -45,61 +46,6 @@ public class lottery extends XSCasinoTemplates {
     public int numberTicketWin;
     public int totalWinPrize;
 
-    public lottery(File customConfigFile, FileConfiguration customConfig) {
-        setCustomConfigFile(customConfigFile);
-        setCustomConfig(customConfig);
-
-        setTitle(getCustomConfig().getString("configuration.title").replace("&","§"));
-        setTopTicketTitle(getCustomConfig().getString("topTicket_configuration.title").replace("&","§"));
-        setMyTicketTitle(getCustomConfig().getString("myTicket_configuration.title").replace("&","§"));
-        setInvSize(getCustomConfig().getInt("configuration.inventorySize"));
-        setTopTicketSize(getCustomConfig().getInt("topTicket_configuration.inventorySize"));
-        setMyTicketSize(getCustomConfig().getInt("myTicket_configuration.inventorySize"));
-        setPriceTicket(getCustomConfig().getDouble("configuration.price_per_ticket"));
-        setPotExtra(getCustomConfig().getLong("configuration.pot_extra"));
-        setPotPrize(getCustomConfig().getLong("configuration.start_pot"));
-        setPrizeTime(getCustomConfig().getInt("configuration.prize_time"));
-
-        if(getCustomConfig().get("data.next_prize_time") == null) {
-            setNextPrizeTime(System.currentTimeMillis() + (getPrizeTime()*1000L));
-        } else {
-            setNextPrizeTime(getCustomConfig().getLong("data.next_prize_time"));
-        }
-
-        if(getCustomConfig().getInt("data.lockPrize.number") != -1) {
-            setLockPrize(getCustomConfig().getInt("data.lockPrize.number"));
-            setSetterName(getCustomConfig().getString("data.lockPrize.setter"));
-        } else {
-            setLockPrize(-1);
-            setSetterName("");
-        }
-
-        if(getCustomConfig().get("data.winner") == null) {
-            setWinner("");
-            setTicketWinNum(-1);
-            setNumberTicketWin(-1);
-            setTotalWinPrize(-1);
-        } else {
-            setWinner(getCustomConfig().getString("data.winner.name"));
-            setTicketWinNum(getCustomConfig().getInt("data.winner.numberTicket"));
-            setNumberTicketWin(getCustomConfig().getInt("data.winner.number"));
-            setTotalWinPrize(getCustomConfig().getInt("data.winner.totalPrize"));
-        }
-
-        int currentAmt = 0;
-        for (String lottery : getCustomConfig().getStringList("data.lottery_list")) {
-            int key = Integer.parseInt(lottery.split(":")[0]);
-            int amount = Integer.parseInt(lottery.split(":")[1]);
-            lotteryList.put(key,amount);
-            currentAmt += amount;
-        }
-
-        setAmountTicket(currentAmt);
-
-        setPotPrize((long) (getPotPrize() + currentAmt*getPotExtra()));
-        createTask();
-        loadUser();
-    }
 
     public int getLockPrize() {
         return LockPrize;
@@ -179,6 +125,253 @@ public class lottery extends XSCasinoTemplates {
 
     public String getTopTicketTitle() {
         return topTicketTitle;
+    }
+
+    public lottery(File customConfigFile, FileConfiguration customConfig) {
+        setCustomConfigFile(customConfigFile);
+        setCustomConfig(customConfig);
+
+        setTitle(getCustomConfig().getString("configuration.title").replace("&","§"));
+        setTopTicketTitle(getCustomConfig().getString("topTicket_configuration.title").replace("&","§"));
+        setMyTicketTitle(getCustomConfig().getString("myTicket_configuration.title").replace("&","§"));
+        setInvSize(getCustomConfig().getInt("configuration.inventorySize"));
+        setTopTicketSize(getCustomConfig().getInt("topTicket_configuration.inventorySize"));
+        setMyTicketSize(getCustomConfig().getInt("myTicket_configuration.inventorySize"));
+        setPriceTicket(getCustomConfig().getDouble("configuration.price_per_ticket"));
+        setPotExtra(getCustomConfig().getLong("configuration.pot_extra"));
+        setPotPrize(getCustomConfig().getLong("configuration.start_pot"));
+        setPrizeTime(getCustomConfig().getInt("configuration.prize_time"));
+
+        if(XSHandlers.getUsingSQL()) {
+            loadDataSQL(XSHandlers.getJDBC_URL(),XSHandlers.getUSER(),XSHandlers.getPASS());
+        } else {
+            int currentAmt = 0;
+            if(getCustomConfig().get("data.next_prize_time") == null) {
+                setNextPrizeTime(System.currentTimeMillis() + (getPrizeTime()*1000L));
+            } else {
+                setNextPrizeTime(getCustomConfig().getLong("data.next_prize_time"));
+            }
+
+            if(getCustomConfig().getInt("data.lockPrize.number") != -1) {
+                setLockPrize(getCustomConfig().getInt("data.lockPrize.number"));
+                setSetterName(getCustomConfig().getString("data.lockPrize.setter"));
+            } else {
+                setLockPrize(-1);
+                setSetterName("");
+            }
+
+            if(getCustomConfig().get("data.winner") == null) {
+                setWinner("");
+                setTicketWinNum(-1);
+                setNumberTicketWin(-1);
+                setTotalWinPrize(-1);
+            } else {
+                setWinner(getCustomConfig().getString("data.winner.name"));
+                setTicketWinNum(getCustomConfig().getInt("data.winner.numberTicket"));
+                setNumberTicketWin(getCustomConfig().getInt("data.winner.number"));
+                setTotalWinPrize(getCustomConfig().getInt("data.winner.totalPrize"));
+            }
+
+            for (String lottery : getCustomConfig().getStringList("data.lottery_list")) {
+                int key = Integer.parseInt(lottery.split(":")[0]);
+                int amount = Integer.parseInt(lottery.split(":")[1]);
+                lotteryList.put(key,amount);
+                currentAmt += amount;
+            }
+            setAmountTicket(currentAmt);
+        }
+
+
+        setPotPrize((long) (getPotPrize() + getAmountTicket()*getPotExtra()));
+        createTask();
+        loadUser();
+    }
+
+    public void loadDataSQL(String JDBC_URL,String USER,String PASS) {
+        try {
+            Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASS) ;
+
+            Statement statement = connection.createStatement();
+
+            String selectQuery = "SELECT * FROM " + XSHandlers.getTableLottery();
+
+            ResultSet resultSet = statement.executeQuery(selectQuery);
+
+            if (resultSet.next()) {
+                String lotteryListData = resultSet.getString("lotteryList");
+                long nextPrizeTime = resultSet.getLong("NextPrizeTime");
+                String winnerName = resultSet.getString("winnerName");
+                String winnerNumber = resultSet.getString("winnerNumber");
+                String winnerAmountTicket = resultSet.getString("winnerNumberTicket");
+                String winnerTotalPrize = resultSet.getString("winnerPrize");
+                String lockPrize = resultSet.getString("lockPrize");
+                String lockSetter = resultSet.getString("lockSetter");
+
+                //Bukkit.broadcastMessage(lotteryList);
+                int currentAmt = 0;
+                if(!lotteryListData.equalsIgnoreCase("[]")) {
+                    lotteryListData = lotteryListData.replaceAll("\\[|\\]", "");
+                    String[] dataArray = lotteryListData.split(",");
+
+                    ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(dataArray));
+                    for (String lottery : arrayList) {
+                        int key = Integer.parseInt(lottery.trim().split(":")[0]);
+                        int amount = Integer.parseInt(lottery.trim().split(":")[1]);
+                        lotteryList.put(key,amount);
+                        currentAmt += amount;
+                    }
+                }
+                setAmountTicket(currentAmt);
+
+                setNextPrizeTime(nextPrizeTime);
+                if(nextPrizeTime == 0) {
+                    setNextPrizeTime(System.currentTimeMillis() + (getPrizeTime()*1000L));
+                } else {
+                    setNextPrizeTime(nextPrizeTime);
+                }
+
+                if(Integer.parseInt(lockPrize) != -1) {
+                    setLockPrize(Integer.parseInt(lockPrize));
+                    setSetterName(lockSetter);
+                } else {
+                    setLockPrize(-1);
+                    setSetterName("");
+                }
+
+
+                if(winnerName.isEmpty()) {
+                    setWinner("");
+                    setTicketWinNum(-1);
+                    setNumberTicketWin(-1);
+                    setTotalWinPrize(-1);
+                } else {
+                    setWinner(winnerName);
+                    setTicketWinNum(Integer.parseInt(winnerNumber));
+                    setNumberTicketWin(Integer.parseInt(winnerAmountTicket));
+                    setTotalWinPrize(Integer.parseInt(winnerTotalPrize));
+                }
+
+                Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Lottery loaded data from database successfully");
+            }
+            resultSet.close();
+            statement.close();
+            connection.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveData() {
+        ArrayList<String> lotteryList = new ArrayList<>();
+        for(Map.Entry<Integer,Integer> lottery : this.getLotteryList().entrySet()) {
+            lotteryList.add(lottery.getKey()+":"+lottery.getValue());
+        }
+
+        if(XSHandlers.getUsingSQL()) {
+            saveTOSQL(XSHandlers.getJDBC_URL(),XSHandlers.getUSER(),XSHandlers.getPASS(),lotteryList);
+        } else {
+            this.getCustomConfig().set("data.lottery_list",lotteryList);
+            this.getCustomConfig().set("data.next_prize_time",getNextPrizeTime());
+
+            if(!getWinner().isEmpty()) {
+                this.getCustomConfig().set("data.winner.name",getWinner());
+                this.getCustomConfig().set("data.winner.number",getTicketWinNum());
+                this.getCustomConfig().set("data.winner.numberTicket",getNumberTicketWin());
+                this.getCustomConfig().set("data.winner.totalPrize",getTotalWinPrize());
+            }
+
+            this.getCustomConfig().set("data.lockPrize.number",getLockPrize());
+            this.getCustomConfig().set("data.lockPrize.setter",getSetterName());
+
+
+            try {
+                getCustomConfig().save(getCustomConfigFile());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void saveTOSQL(String JDBC_URL,String USER,String PASS,ArrayList<String> lotteryData) {
+        try {
+            Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASS);
+
+            String updateQuery = "UPDATE " +XSHandlers.getTableLottery() + " SET lotteryList=?, NextPrizeTime=?," +
+                    " winnerName=?, winnerNumber=?, winnerNumberTicket=?, winnerPrize=?," +
+                    " lockPrize=?, lockSetter=? LIMIT 1";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
+
+            preparedStatement.setString(1, String.valueOf(lotteryData));
+            preparedStatement.setLong(2, getNextPrizeTime());
+            if(!getWinner().isEmpty()) {
+                preparedStatement.setString(3, getWinner());
+                preparedStatement.setString(4, String.valueOf(getTicketWinNum()));
+                preparedStatement.setString(5, String.valueOf(getNumberTicketWin()));
+                preparedStatement.setString(6, String.valueOf(getTotalWinPrize()));
+            } else {
+                preparedStatement.setString(3, "");
+                preparedStatement.setString(4, "");
+                preparedStatement.setString(5, "");
+                preparedStatement.setString(6, "");
+            }
+            preparedStatement.setString(7, String.valueOf(getLockPrize()));
+            preparedStatement.setString(8, getSetterName());
+
+            preparedStatement.executeUpdate();
+
+            preparedStatement.close();
+            connection.close();
+
+            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSAPI Casino] Lottery Database : §x§6§0§F§F§0§0Saved!");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createSQL(String JDBC_URL,String USER,String PASS) {
+        try {
+            Connection connection = DriverManager.getConnection(JDBC_URL,USER,PASS);
+
+            DatabaseMetaData metaData = connection.getMetaData();
+            ResultSet resultSet = metaData.getTables(null, null, XSHandlers.getTableLottery(), null);
+            boolean tableExists = resultSet.next();
+
+            if(!tableExists) {
+                Statement statement = connection.createStatement();
+
+                String createTableQuery = "CREATE TABLE " + XSHandlers.getTableLottery() + " ("
+                        + "lotteryList TEXT DEFAULT '[]', "
+                        + "NextPrizeTime BIGINT DEFAULT 0, "
+                        + "winnerName VARCHAR(16) DEFAULT '', "
+                        + "winnerNumber VARCHAR(2) DEFAULT '', "
+                        + "winnerNumberTicket VARCHAR(10) DEFAULT '', "
+                        + "winnerPrize VARCHAR(20) DEFAULT '', "
+                        + "lockPrize VARCHAR(2) DEFAULT '', "
+                        + "lockSetter VARCHAR(16) DEFAULT ''"
+                        + ")";
+
+                statement.executeUpdate(createTableQuery);
+
+
+                Statement statementInsert = connection.createStatement();
+
+                String insertQuery = "INSERT INTO " + XSHandlers.getTableLottery() + " (lotteryList) "
+                        + "VALUES ('[]')";
+
+                statementInsert.executeUpdate(insertQuery);
+                statementInsert.close();
+                statement.close();
+            }
+            connection.close();
+
+            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Lottery Database : §x§6§0§F§F§0§0Connected");
+        } catch (SQLException e) {
+            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSasino] Lottery Database : §x§C§3§0§C§2§ANot Connected");
+            e.printStackTrace();
+        }
     }
 
     public void createTask() {
@@ -456,29 +649,4 @@ public class lottery extends XSCasinoTemplates {
         return title;
     }
 
-    public void saveData() {
-        ArrayList<String> lotteryList = new ArrayList<>();
-        for(Map.Entry<Integer,Integer> lottery : this.getLotteryList().entrySet()) {
-            lotteryList.add(lottery.getKey()+":"+lottery.getValue());
-        }
-        this.getCustomConfig().set("data.lottery_list",lotteryList);
-        this.getCustomConfig().set("data.next_prize_time",getNextPrizeTime());
-
-        if(!getWinner().isEmpty()) {
-            this.getCustomConfig().set("data.winner.name",getWinner());
-            this.getCustomConfig().set("data.winner.number",getTicketWinNum());
-            this.getCustomConfig().set("data.winner.numberTicket",getNumberTicketWin());
-            this.getCustomConfig().set("data.winner.totalPrize",getTotalWinPrize());
-        }
-
-        this.getCustomConfig().set("data.lockPrize.number",getLockPrize());
-        this.getCustomConfig().set("data.lockPrize.setter",getSetterName());
-
-
-        try {
-            getCustomConfig().save(getCustomConfigFile());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
