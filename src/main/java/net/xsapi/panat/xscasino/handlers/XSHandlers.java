@@ -32,7 +32,10 @@ public class XSHandlers {
 
     //Redis Connnection
     private static boolean usingRedis = false;
-    private static String hostRedis;
+    private static String hostCrossServer;
+    public static String redisHost;
+    public static int redisPort;
+    public static String redisPass;
     private static String localRedis;
     public static ArrayList<Thread> threads = new ArrayList<>();
 
@@ -52,8 +55,18 @@ public class XSHandlers {
     private static Economy econ = null;
     private static Permission perms = null;
 
-    public static String getRedisHost() {
-        return hostRedis;
+    public static String getHostRedis() {
+        return redisHost;
+    }
+    public static String getHostCrossServer() {
+        return hostCrossServer;
+    }
+    public static String getRedisPass() {
+        return redisPass;
+    }
+
+    public static int getRedisPort() {
+        return redisPort;
     }
 
     public static boolean getUsingRedis() {
@@ -88,17 +101,16 @@ public class XSHandlers {
     public static void setupDefault() {
         usingRedis = config.customConfig.getBoolean("redis.enable");
         usingSQL = config.customConfig.getBoolean("database.enable");
-        hostRedis = config.customConfig.getString("cross-server.server-name");
+        hostCrossServer = config.customConfig.getString("cross-server.server-name");
         localRedis = config.customConfig.getString("cross-server.parent-name");
 
         if(usingRedis) {
             if(redisConnection()) {
                 localRedis = config.customConfig.getString("cross-server.server-name");
-                hostRedis = config.customConfig.getString("cross-server.parent-name");
+                hostCrossServer = config.customConfig.getString("cross-server.parent-name");
 
                 createRedisTask();
-                //subscribeToChannelAsync("LoginEvent/"+core.getLocalRedis());
-                //subscribeToChannelAsync("XSEventRedisData/"+core.getRedisHost());
+                subscribeToChannelAsync("XSCasinoRedisData/XSLottery/Update/"+ getHostCrossServer());
             }
         }
 
@@ -113,13 +125,10 @@ public class XSHandlers {
     }
 
     private static void subscribeToChannelAsync(String channelName) {
-        String redisHost = config.customConfig.getString("redis.host");
-        int redisPort = config.customConfig.getInt("redis.port");
-        String password = config.customConfig.getString("redis.password");
         Thread thread = new Thread(() -> {
-            try (Jedis jedis = new Jedis(redisHost, redisPort)) {
-                if(!password.isEmpty()) {
-                    jedis.auth(password);
+            try (Jedis jedis = new Jedis(getHostRedis(), getRedisPort())) {
+                if(!getRedisPass().isEmpty()) {
+                    jedis.auth(getRedisPass());
                 }
                 JedisPubSub jedisPubSub = new JedisPubSub() {
                     @Override
@@ -127,8 +136,9 @@ public class XSHandlers {
                         if (Thread.currentThread().isInterrupted()) {
                             return;
                         }
-                        if(channel.equalsIgnoreCase("LoginEvent")) {
-
+                        if(channel.equalsIgnoreCase("XSCasinoRedisData/XSLottery/Update/"+ getHostCrossServer())) {
+                            Bukkit.broadcastMessage("Recieved Data (send from client) --> " + message);
+                            Bukkit.broadcastMessage("--------------------");
                         }
                     }
                 };
@@ -148,33 +158,16 @@ public class XSHandlers {
         }
     }
 
-    public static void sendMessageToRedisAsync(String CHName, String message) {
-        String redisHost = config.customConfig.getString("redis.host");
-        int redisPort = config.customConfig.getInt("redis.port");
-        String password = config.customConfig.getString("redis.password");
-
-        new Thread(() -> {
-            try (Jedis jedis = new Jedis(redisHost, redisPort)) {
-                if(!password.isEmpty()) {
-                    jedis.auth(password);
-                }
-                jedis.publish(CHName, message);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
 
     private static boolean redisConnection() {
-        String redisHost = config.customConfig.getString("redis.host");
-        int redisPort = config.customConfig.getInt("redis.port");
-        String password = config.customConfig.getString("redis.password");
+        redisHost = config.customConfig.getString("redis.host");
+        redisPort = config.customConfig.getInt("redis.port");
+        redisPass = config.customConfig.getString("redis.password");
 
         try {
-            Jedis jedis = new Jedis(redisHost, redisPort);
-            if(!password.isEmpty()) {
-                jedis.auth(password);
+            Jedis jedis = new Jedis(getHostRedis(), getRedisPort());
+            if(!getRedisPass().isEmpty()) {
+                jedis.auth(getRedisPass());
             }
             jedis.close();
             Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Redis Server : §x§6§0§F§F§0§0Connected");
@@ -190,16 +183,30 @@ public class XSHandlers {
         new BukkitRunnable() {
             @Override
             public void run() {
-                sendDataObjectRedis("XSCasinoRedisData/XSLottery/"+ XSHandlers.getRedisHost() + "/" + XSHandlers.getLocalRedis(),XSLottery.getLotteryList());
+                sendDataObjectRedis("XSCasinoRedisData/XSLottery/"+ XSHandlers.getHostCrossServer() + "/" + XSHandlers.getLocalRedis(),XSLottery.getLotteryList());
             }
         }.runTaskTimer(XSCasino.getPlugin(), 0L, 200L);
+    }
+
+    public static void sendMessageToRedisAsync(String CHName, String message) {
+
+        new Thread(() -> {
+            try (Jedis jedis = new Jedis(getHostRedis(), getRedisPort())) {
+                if(!getRedisPass().isEmpty()) {
+                    jedis.auth(getRedisPass());
+                }
+                jedis.publish(CHName, message);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public static void sendDataObjectRedis(String CHName,HashMap<Integer,Integer> lotteryList) {
         Gson gson = new Gson();
         String jsonString = gson.toJson(lotteryList);
         XSHandlers.sendMessageToRedisAsync(CHName,jsonString);
-        Bukkit.broadcastMessage("Send.... From " + CHName);
+        Bukkit.broadcastMessage("Client Send.... From " + CHName);
     }
 
     private static void createUserTable() {
@@ -263,7 +270,7 @@ public class XSHandlers {
                         lotteryList.add(lottery.getKey()+":"+lottery.getValue());
                     }
                     xsUser.saveUserSQL(lotteryList);
-                    Bukkit.getLogger().info("Saved " + p.getName() + " via SQL");
+                    //Bukkit.getLogger().info("Saved " + p.getName() + " via SQL");
                 }
             } else {
                 if(XSHandlers.xsCasinoUser.containsKey(p.getUniqueId())) {
