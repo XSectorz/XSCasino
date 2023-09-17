@@ -1,5 +1,7 @@
 package net.xsapi.panat.xscasino.modules;
 
+import com.google.gson.Gson;
+import net.xsapi.panat.xscasino.configuration.config;
 import net.xsapi.panat.xscasino.configuration.messages;
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;

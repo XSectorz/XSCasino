@@ -1,5 +1,6 @@
 package net.xsapi.panat.xscasino.handlers;
 
+import com.google.gson.Gson;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import net.xsapi.panat.xscasino.configuration.config;
@@ -16,6 +17,7 @@ import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.scheduler.BukkitRunnable;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
@@ -32,6 +34,7 @@ public class XSHandlers {
     private static boolean usingRedis = false;
     private static String hostRedis;
     private static String localRedis;
+    public static ArrayList<Thread> threads = new ArrayList<>();
 
     //MySQL Connection
     private static boolean usingSQL = false;
@@ -93,6 +96,7 @@ public class XSHandlers {
                 localRedis = config.customConfig.getString("cross-server.server-name");
                 hostRedis = config.customConfig.getString("cross-server.parent-name");
 
+                createRedisTask();
                 //subscribeToChannelAsync("LoginEvent/"+core.getLocalRedis());
                 //subscribeToChannelAsync("XSEventRedisData/"+core.getRedisHost());
             }
@@ -108,41 +112,11 @@ public class XSHandlers {
         }
     }
 
-    private static void createUserTable() {
-        try {
-            Connection connection = DriverManager.getConnection(JDBC_URL,USER,PASS);
-
-            DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, getTableXSPlayer(), null);
-            boolean tableExists = resultSet.next();
-
-            if(!tableExists) {
-                Statement statement = connection.createStatement();
-
-                String createTableQuery = "CREATE TABLE " + getTableXSPlayer() + " ("
-                        + "id INT PRIMARY KEY AUTO_INCREMENT, "
-                        + "UUID VARCHAR(36), "
-                        + "playerName VARCHAR(16), "
-                        + "lotteryList TEXT"
-                        + ")";
-
-                statement.executeUpdate(createTableQuery);
-                statement.close();
-            }
-            connection.close();
-
-            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Player Database : §x§6§0§F§F§0§0Connected");
-        } catch (SQLException e) {
-            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Player Database : §x§C§3§0§C§2§ANot Connected");
-            e.printStackTrace();
-        }
-    }
-
     private static void subscribeToChannelAsync(String channelName) {
         String redisHost = config.customConfig.getString("redis.host");
         int redisPort = config.customConfig.getInt("redis.port");
         String password = config.customConfig.getString("redis.password");
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             try (Jedis jedis = new Jedis(redisHost, redisPort)) {
                 if(!password.isEmpty()) {
                     jedis.auth(password);
@@ -150,6 +124,9 @@ public class XSHandlers {
                 JedisPubSub jedisPubSub = new JedisPubSub() {
                     @Override
                     public void onMessage(String channel, String message) {
+                        if (Thread.currentThread().isInterrupted()) {
+                            return;
+                        }
                         if(channel.equalsIgnoreCase("LoginEvent")) {
 
                         }
@@ -159,10 +136,19 @@ public class XSHandlers {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }).start();
+        });
+
+        thread.start();
+        threads.add(thread);
     }
 
-    public void sendMessageToRedisAsync(String CHName,String message) {
+    public static void destroyAllThread() {
+        for(Thread thread : threads) {
+            thread.interrupt();
+        }
+    }
+
+    public static void sendMessageToRedisAsync(String CHName, String message) {
         String redisHost = config.customConfig.getString("redis.host");
         int redisPort = config.customConfig.getInt("redis.port");
         String password = config.customConfig.getString("redis.password");
@@ -198,6 +184,52 @@ public class XSHandlers {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static void createRedisTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                sendDataObjectRedis("XSCasinoRedisData/XSLottery/"+ XSHandlers.getRedisHost() + "/" + XSHandlers.getLocalRedis(),XSLottery.getLotteryList());
+            }
+        }.runTaskTimer(XSCasino.getPlugin(), 0L, 200L);
+    }
+
+    public static void sendDataObjectRedis(String CHName,HashMap<Integer,Integer> lotteryList) {
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(lotteryList);
+        XSHandlers.sendMessageToRedisAsync(CHName,jsonString);
+        Bukkit.broadcastMessage("Send.... From " + CHName);
+    }
+
+    private static void createUserTable() {
+        try {
+            Connection connection = DriverManager.getConnection(JDBC_URL,USER,PASS);
+
+            DatabaseMetaData metaData = connection.getMetaData();
+            ResultSet resultSet = metaData.getTables(null, null, getTableXSPlayer(), null);
+            boolean tableExists = resultSet.next();
+
+            if(!tableExists) {
+                Statement statement = connection.createStatement();
+
+                String createTableQuery = "CREATE TABLE " + getTableXSPlayer() + " ("
+                        + "id INT PRIMARY KEY AUTO_INCREMENT, "
+                        + "UUID VARCHAR(36), "
+                        + "playerName VARCHAR(16), "
+                        + "lotteryList TEXT"
+                        + ")";
+
+                statement.executeUpdate(createTableQuery);
+                statement.close();
+            }
+            connection.close();
+
+            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Player Database : §x§6§0§F§F§0§0Connected");
+        } catch (SQLException e) {
+            Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Player Database : §x§C§3§0§C§2§ANot Connected");
+            e.printStackTrace();
+        }
     }
 
     public static void loadXSCasinoModules() {
