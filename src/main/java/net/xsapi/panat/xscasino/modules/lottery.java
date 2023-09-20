@@ -1,6 +1,7 @@
 package net.xsapi.panat.xscasino.modules;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import net.xsapi.panat.xscasino.configuration.config;
 import net.xsapi.panat.xscasino.configuration.messages;
 import net.xsapi.panat.xscasino.core.XSCasino;
@@ -186,6 +187,24 @@ public class lottery extends XSCasinoTemplates {
 
         setPotPrize((long) (getPotPrize() + getAmountTicket()*getPotExtra()));
         createTask();
+    }
+
+    public void redisConvertObject(String data) {
+        if (data.isEmpty()) {
+            return;
+        }
+        int ticketNumber = Integer.parseInt(data.split(":")[0]);
+        int ticketAmount = Integer.parseInt(data.split(":")[1]);
+
+        addPotPrize(ticketAmount);
+        setAmountTicket(XSHandlers.XSLottery.getAmountTicket()+ticketAmount);
+
+        if(lotteryList.containsKey(ticketNumber)) {
+            lotteryList.replace(ticketNumber, lotteryList.get(ticketNumber)+ticketAmount);
+        } else {
+            lotteryList.put(ticketNumber,ticketAmount);
+        }
+
     }
 
     public void loadDataSQL(String JDBC_URL,String USER,String PASS) {
@@ -400,37 +419,70 @@ public class lottery extends XSCasinoTemplates {
             @Override
             public void run() {
                 //Bukkit.broadcastMessage("CURRENT: " + System.currentTimeMillis() + " NEXT: " + getNextPrizeTime() + " = " + (System.currentTimeMillis() - getNextPrizeTime()));
-                if(System.currentTimeMillis() - getNextPrizeTime() >= 0L) {
-                    setNextPrizeTime(System.currentTimeMillis() + (getPrizeTime()*1000L));
-                    int prizeNum;
 
-                    if(getLockPrize() != -1) {
-                        prizeNum = getLockPrize();
-                    } else {
-                        prizeNum = generatePrizeNumber();
+                if(!XSHandlers.getUsingRedis()) {
+                    if(System.currentTimeMillis() - getNextPrizeTime() >= 0L) {
+                        setNextPrizeTime(System.currentTimeMillis() + (getPrizeTime()*1000L));
+                        int prizeNum;
+
+                        if(getLockPrize() != -1) {
+                            prizeNum = getLockPrize();
+                        } else {
+                            prizeNum = generatePrizeNumber();
+                        }
+
+                        String str = String.valueOf(prizeNum);
+
+                        if(str.length() == 1) {
+                            str = ("0" + str);
+                        }
+
+                        // Bukkit.broadcastMessage("Lottery Prize Out! " + str);
+                        for(Player p : Bukkit.getOnlinePlayers()) {
+                            String winMsg = messages.customConfig.getString("lottery_prize_annoucement")
+                                    .replace("%number%",str).replace("%prize%",String.valueOf(getPotPrize()));
+
+                            XSUtils.sendReplaceComponents(p,winMsg);
+                        }
+                        sendReward(prizeNum);
                     }
-
-                    String str = String.valueOf(prizeNum);
-
-                    if(str.length() == 1) {
-                        str = ("0" + str);
-                    }
-
-                   // Bukkit.broadcastMessage("Lottery Prize Out! " + str);
-                    for(Player p : Bukkit.getOnlinePlayers()) {
-                        String winMsg = messages.customConfig.getString("lottery_prize_annoucement")
-                                .replace("%number%",str).replace("%prize%",String.valueOf(getPotPrize()));
-
-                        XSUtils.sendReplaceComponents(p,winMsg);
-                    }
-                    sendReward(prizeNum);
                 }
                 for(Map.Entry<UUID,Inventory> playerOpen : xsLotteryUserOpenUI.entrySet()) {
                     updateInventory(Bukkit.getPlayer(playerOpen.getKey()));
                 }
             }
         }, 0L, 20L);
+    }
 
+    public void sendPrizeWinRedis(String message) {
+        String str = String.valueOf(message);
+        if(str.length() == 1) {
+            str = ("0" + str);
+        }
+        // Bukkit.broadcastMessage("Lottery Prize Out! " + str);
+        for(Player p : Bukkit.getOnlinePlayers()) {
+            String winMsg = messages.customConfig.getString("lottery_prize_annoucement")
+                    .replace("%number%",str).replace("%prize%",String.valueOf(getPotPrize()));
+
+            XSUtils.sendReplaceComponents(p,winMsg);
+        }
+        checkRewardWinRedis(Integer.parseInt(str));
+    }
+
+    public void checkRewardWinRedis(int prizeNum) {
+        HashMap<String,Integer> winnerList = new HashMap<>();
+        for(Map.Entry<UUID,XSUser> userList : XSHandlers.xsCasinoUser.entrySet()) {
+            if(!userList.getValue().getLottery().isEmpty()) {
+                if(userList.getValue().getLottery().containsKey(prizeNum)) {
+                    winnerList.put(userList.getValue().getPlayer().getName(),userList.getValue().getLottery().get(prizeNum));
+                }
+                userList.getValue().getLottery().clear();
+            }
+        }
+
+        Gson gson = new Gson();
+        String winList = gson.toJson(winnerList);
+        XSHandlers.sendMessageToRedisAsync("XSCasinoRedisData/XSLottery/WinnerList/"+ XSHandlers.getHostCrossServer() + "/" + XSHandlers.getLocalRedis(),winList);
     }
 
     public void sendReward(int prizeNum) {
@@ -577,6 +629,25 @@ public class lottery extends XSCasinoTemplates {
         }
       //  Bukkit.broadcastMessage("-----------------------------");
 
+        clearLotteryData();
+    }
+
+    public void calculatePrizeRedis(String message) {
+        Gson gson = new Gson();
+        HashMap<String, Integer> resultMap = gson.fromJson(message, new TypeToken<HashMap<String, Integer>>(){}.getType());
+
+        int amountTicket = 0;
+        for(Map.Entry<String,Integer> data : resultMap.entrySet()) {
+            amountTicket += data.getValue();
+        }
+        Bukkit.broadcastMessage("Winticket: " + amountTicket);
+
+        for (Map.Entry<String,Integer> winner : resultMap.entrySet()) {
+            double prizePool = (double) winner.getValue() / amountTicket;
+            double reward = (getPotPrize() * prizePool);
+            XSHandlers.getEconomy().depositPlayer(Bukkit.getPlayer(winner.getKey()),reward);
+        }
+        resetPlayerData(XSHandlers.getJDBC_URL(),XSHandlers.getUSER(),XSHandlers.getPASS());
         clearLotteryData();
     }
 

@@ -132,9 +132,10 @@ public class XSUser {
 
     public void saveUserSQL(ArrayList<String> lotteryData) {
         try (Connection connection = DriverManager.getConnection(XSHandlers.getJDBC_URL(), XSHandlers.getUSER(), XSHandlers.getPASS())) {
-            String updateQuery = "UPDATE " + XSHandlers.getTableXSPlayer() + " SET lotteryList = ?";
+            String updateQuery = "UPDATE " + XSHandlers.getTableXSPlayer() + " SET lotteryList = ? WHERE playername = ?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
                 preparedStatement.setString(1, lotteryData.toString());
+                preparedStatement.setString(2, p.getName());
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {

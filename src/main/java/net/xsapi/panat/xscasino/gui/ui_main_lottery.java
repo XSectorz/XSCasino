@@ -165,9 +165,6 @@ public class ui_main_lottery implements Listener {
                                         .replace("%price%",String.valueOf(price));
                                 XSUtils.sendReplaceComponents(p,message);
 
-                                XSHandlers.XSLottery.addPotPrize(amount);
-                                XSHandlers.XSLottery.setAmountTicket(XSHandlers.XSLottery.getAmountTicket()+amount);
-
                                 if(XSHandlers.xsCasinoUser.containsKey(p.getUniqueId())) {
                                     XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
                                     if(xsUser.getLottery().containsKey(ticket)) {
@@ -186,13 +183,20 @@ public class ui_main_lottery implements Listener {
                                     // p.sendMessage("Buy New: " + lines[1] + "  " + lines[2]);
                                 }
 
-                                if(XSHandlers.XSLottery.getLotteryList().containsKey(ticket)) {
-                                    XSHandlers.XSLottery.getLotteryList().replace(ticket,
-                                            XSHandlers.XSLottery.getLotteryList().get(ticket)+amount);
+                                if(XSHandlers.getUsingRedis()) {
+                                    XSHandlers.sendDataObjectRedis("XSCasinoRedisData/XSLottery/"+ XSHandlers.getHostCrossServer() + "/" + XSHandlers.getLocalRedis(),ticket + ":" + amount);
                                 } else {
-                                    XSHandlers.XSLottery.getLotteryList().put(ticket,amount);
-                                }
+                                    XSHandlers.XSLottery.addPotPrize(amount);
+                                    XSHandlers.XSLottery.setAmountTicket(XSHandlers.XSLottery.getAmountTicket()+amount);
 
+                                    if(XSHandlers.XSLottery.getLotteryList().containsKey(ticket)) {
+                                        XSHandlers.XSLottery.getLotteryList().replace(ticket,
+                                                XSHandlers.XSLottery.getLotteryList().get(ticket)+amount);
+                                    } else {
+                                        XSHandlers.XSLottery.getLotteryList().put(ticket,amount);
+                                    }
+
+                                }
                                 if(XSHandlers.XSLottery.getXsLotteryUserOpenUI().containsKey(p.getUniqueId())) {
                                     XSHandlers.XSLottery.getXsLotteryUserOpenUI().remove(p.getUniqueId());
                                 }

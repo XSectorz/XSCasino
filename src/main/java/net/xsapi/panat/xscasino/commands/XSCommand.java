@@ -58,8 +58,15 @@ public class XSCommand implements CommandExecutor {
                                 XSUtils.sendMessages(sender,"not_in_range");
                                 return false;
                             }
-                            XSHandlers.XSLottery.setLockPrize(data);
-                            XSHandlers.XSLottery.setSetterName(sender.getName());
+
+                            if(XSHandlers.getUsingRedis()) {
+                                String msg = "LockPrize:" + data + ":" + sender.getName();
+                                XSHandlers.sendMessageToRedisAsync("XSCasinoRedisData/XSLottery/Change/"+ XSHandlers.getHostCrossServer() + "/" + XSHandlers.getLocalRedis(),msg);
+                            } else {
+                                XSHandlers.XSLottery.setLockPrize(data);
+                                XSHandlers.XSLottery.setSetterName(sender.getName());
+                            }
+
                             XSUtils.sendMessages(sender,"set_lock_success");
                             return true;
                         }

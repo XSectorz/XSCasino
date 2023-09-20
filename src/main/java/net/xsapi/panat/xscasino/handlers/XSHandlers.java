@@ -5,6 +5,7 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import net.xsapi.panat.xscasino.configuration.config;
 import net.xsapi.panat.xscasino.configuration.lotteryConfig;
+import net.xsapi.panat.xscasino.configuration.messages;
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.events.joinEvent;
 import net.xsapi.panat.xscasino.events.leaveEvent;
@@ -109,8 +110,10 @@ public class XSHandlers {
                 localRedis = config.customConfig.getString("cross-server.server-name");
                 hostCrossServer = config.customConfig.getString("cross-server.parent-name");
 
-                createRedisTask();
+               // createRedisTask();
                 subscribeToChannelAsync("XSCasinoRedisData/XSLottery/Update/"+ getHostCrossServer());
+                subscribeToChannelAsync("XSCasinoRedisData/XSLottery/EndPrizeNumber/"+ getHostCrossServer());
+                subscribeToChannelAsync("XSCasinoRedisData/XSLottery/EndSendWinnerList/"+ getHostCrossServer());
             }
         }
 
@@ -136,9 +139,14 @@ public class XSHandlers {
                         if (Thread.currentThread().isInterrupted()) {
                             return;
                         }
+                        Bukkit.getConsoleSender().sendMessage("Recieved Data (send from client) --> " + message);
+                        Bukkit.getConsoleSender().sendMessage("--------------------");
                         if(channel.equalsIgnoreCase("XSCasinoRedisData/XSLottery/Update/"+ getHostCrossServer())) {
-                            Bukkit.broadcastMessage("Recieved Data (send from client) --> " + message);
-                            Bukkit.broadcastMessage("--------------------");
+                            XSLottery.redisConvertObject(message);
+                        } else if(channel.equalsIgnoreCase("XSCasinoRedisData/XSLottery/EndPrizeNumber/"+ getHostCrossServer())) {
+                            XSLottery.sendPrizeWinRedis(message);
+                        } else if(channel.equalsIgnoreCase("XSCasinoRedisData/XSLottery/EndSendWinnerList/"+ getHostCrossServer())) {
+                            XSLottery.calculatePrizeRedis(message);
                         }
                     }
                 };
@@ -179,15 +187,6 @@ public class XSHandlers {
         return false;
     }
 
-    public static void createRedisTask() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                sendDataObjectRedis("XSCasinoRedisData/XSLottery/"+ XSHandlers.getHostCrossServer() + "/" + XSHandlers.getLocalRedis(),XSLottery.getLotteryList());
-            }
-        }.runTaskTimer(XSCasino.getPlugin(), 0L, 200L);
-    }
-
     public static void sendMessageToRedisAsync(String CHName, String message) {
 
         new Thread(() -> {
@@ -202,10 +201,8 @@ public class XSHandlers {
         }).start();
     }
 
-    public static void sendDataObjectRedis(String CHName,HashMap<Integer,Integer> lotteryList) {
-        Gson gson = new Gson();
-        String jsonString = gson.toJson(lotteryList);
-        XSHandlers.sendMessageToRedisAsync(CHName,jsonString);
+    public static void sendDataObjectRedis(String CHName,String lottery) {
+        XSHandlers.sendMessageToRedisAsync(CHName,lottery);
         Bukkit.broadcastMessage("Client Send.... From " + CHName);
     }
 
