@@ -114,6 +114,7 @@ public class XSHandlers {
                 subscribeToChannelAsync("XSCasinoRedisData/XSLottery/Update/"+ getHostCrossServer());
                 subscribeToChannelAsync("XSCasinoRedisData/XSLottery/EndPrizeNumber/"+ getHostCrossServer());
                 subscribeToChannelAsync("XSCasinoRedisData/XSLottery/EndSendWinnerList/"+ getHostCrossServer());
+                subscribeToChannelAsync("XSCasinoRedisData/XSLottery/RequestsReturn/"+ getHostCrossServer() + "/" + getLocalRedis());
             }
         }
 
@@ -147,7 +148,10 @@ public class XSHandlers {
                             XSLottery.sendPrizeWinRedis(message);
                         } else if(channel.equalsIgnoreCase("XSCasinoRedisData/XSLottery/EndSendWinnerList/"+ getHostCrossServer())) {
                             XSLottery.calculatePrizeRedis(message);
+                        } else if(channel.equalsIgnoreCase("XSCasinoRedisData/XSLottery/RequestsReturn/"+ getHostCrossServer() + "/" + getLocalRedis())) {
+                            XSLottery.loadDataFromRedisServer(message);
                         }
+
                     }
                 };
                 jedis.subscribe(jedisPubSub, channelName);

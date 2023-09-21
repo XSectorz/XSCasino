@@ -3,6 +3,7 @@ package net.xsapi.panat.xscasino.handlers;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.xsapi.panat.xscasino.configuration.messages;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -112,6 +113,13 @@ public class XSUtils {
         }
 
         return timer;
+    }
+
+    public static String replacePlainToString(String str) {
+        Component parsedMessage = MiniMessage.builder().build().deserialize(str);
+
+        String legacy = LegacyComponentSerializer.legacyAmpersand().serialize(parsedMessage);
+        return legacy.replace('&', '§');
     }
 
 }
