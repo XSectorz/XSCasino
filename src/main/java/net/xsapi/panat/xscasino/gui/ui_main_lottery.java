@@ -2,6 +2,7 @@ package net.xsapi.panat.xscasino.gui;
 
 import de.rapha149.signgui.SignGUI;
 import net.xsapi.panat.xscasino.configuration.messages;
+import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
 import net.xsapi.panat.xscasino.handlers.XSUtils;
 import net.xsapi.panat.xscasino.user.XSUser;
@@ -16,6 +17,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 public class ui_main_lottery implements Listener {
@@ -46,13 +48,15 @@ public class ui_main_lottery implements Listener {
     public static void updateInventory(Player p) {
 
         Inventory inv = XSHandlers.XSLottery.getXsLotteryUserOpenUI().get(p.getUniqueId());
-        updateInventoryContents(inv,p);
+        updateInventoryContents(inv);
         p.updateInventory();
     }
 
-    public static void updateInventoryContents(Inventory inv,Player p) {
+    public static void updateInventoryContents(Inventory inv) {
 
-        String currTime = XSUtils.convertTime(Math.abs(System.currentTimeMillis()-XSHandlers.XSLottery.getNextPrizeTime()));
+        String currTime;
+
+        currTime = XSUtils.convertTime(Math.abs(System.currentTimeMillis()-XSHandlers.XSLottery.getNextPrizeTime()));
 
         String winner = "";
         String number = "";
@@ -125,6 +129,13 @@ public class ui_main_lottery implements Listener {
             }
             else if(XSHandlers.XSLottery.getCustomConfig().getStringList("contents.buy_ticket.slots").contains(String.valueOf(e.getSlot()))) {
                 p.closeInventory();
+                if(XSHandlers.getUsingRedis()) {
+                    Bukkit.broadcastMessage("Can buy: " + XSHandlers.XSLottery.isBuyAble());
+                    if(!XSHandlers.XSLottery.isBuyAble()) {
+                        XSUtils.sendMessages(p,"redis_not_connect");
+                        return;
+                    }
+                }
                 new SignGUI()
                         .lines("§6พิมพ์เลข/จำนวน", "69", "-1", "§6^^^^^^^^^^^")
                         .type(Material.DARK_OAK_SIGN)
@@ -185,17 +196,16 @@ public class ui_main_lottery implements Listener {
 
                                 if(XSHandlers.getUsingRedis()) {
                                     XSHandlers.sendDataObjectRedis("XSCasinoRedisData/XSLottery/"+ XSHandlers.getHostCrossServer() + "/" + XSHandlers.getLocalRedis(),ticket + ":" + amount);
+
                                 } else {
                                     XSHandlers.XSLottery.addPotPrize(amount);
                                     XSHandlers.XSLottery.setAmountTicket(XSHandlers.XSLottery.getAmountTicket()+amount);
-
-                                    if(XSHandlers.XSLottery.getLotteryList().containsKey(ticket)) {
-                                        XSHandlers.XSLottery.getLotteryList().replace(ticket,
-                                                XSHandlers.XSLottery.getLotteryList().get(ticket)+amount);
-                                    } else {
-                                        XSHandlers.XSLottery.getLotteryList().put(ticket,amount);
-                                    }
-
+                                }
+                                if(XSHandlers.XSLottery.getLotteryList().containsKey(ticket)) {
+                                    XSHandlers.XSLottery.getLotteryList().replace(ticket,
+                                            XSHandlers.XSLottery.getLotteryList().get(ticket)+amount);
+                                } else {
+                                    XSHandlers.XSLottery.getLotteryList().put(ticket,amount);
                                 }
                                 if(XSHandlers.XSLottery.getXsLotteryUserOpenUI().containsKey(p.getUniqueId())) {
                                     XSHandlers.XSLottery.getXsLotteryUserOpenUI().remove(p.getUniqueId());

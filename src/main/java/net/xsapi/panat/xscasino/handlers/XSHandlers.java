@@ -115,6 +115,7 @@ public class XSHandlers {
                 subscribeToChannelAsync("XSCasinoRedisData/XSLottery/EndPrizeNumber/"+ getHostCrossServer());
                 subscribeToChannelAsync("XSCasinoRedisData/XSLottery/EndSendWinnerList/"+ getHostCrossServer());
                 subscribeToChannelAsync("XSCasinoRedisData/XSLottery/RequestsReturn/"+ getHostCrossServer() + "/" + getLocalRedis());
+                subscribeToChannelAsync("XSCasinoRedisData/XSLottery/ResponseStatus/"+ getHostCrossServer() + "/" + getLocalRedis());
             }
         }
 
@@ -126,6 +127,9 @@ public class XSHandlers {
             PASS = config.customConfig.getString("database.password");
             createUserTable();
         }
+
+        //Check is redis server available
+        XSHandlers.sendMessageToRedisAsync("XSCasinoRedisData/XSLottery/CheckStatus/"+ XSHandlers.getHostCrossServer() + "/" + XSHandlers.getLocalRedis(),XSHandlers.getLocalRedis());
     }
 
     private static void subscribeToChannelAsync(String channelName) {
@@ -150,6 +154,12 @@ public class XSHandlers {
                             XSLottery.calculatePrizeRedis(message);
                         } else if(channel.equalsIgnoreCase("XSCasinoRedisData/XSLottery/RequestsReturn/"+ getHostCrossServer() + "/" + getLocalRedis())) {
                             XSLottery.loadDataFromRedisServer(message);
+                        } else if(channel.equalsIgnoreCase("XSCasinoRedisData/XSLottery/ResponseStatus/"+ getHostCrossServer() + "/" + getLocalRedis())) {
+                            if(message.equalsIgnoreCase("true")) {
+                                XSLottery.setBuyAble(true);
+                            } else {
+                                XSLottery.setBuyAble(false);
+                            }
                         }
 
                     }

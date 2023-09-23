@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -66,6 +68,32 @@ public class XSUtils {
 
     }
 
+    public static long calculateTimeRedis(String time) {
+
+        LocalTime currentTime = LocalTime.now();
+        //LocalTime currentTime =LocalTime.of(0, 1);
+        LocalTime targetTime = LocalTime.of(Integer.parseInt(time.split(":")[0]), Integer.parseInt(time.split(":")[1]));
+        Duration duration;
+        if (currentTime.isAfter(targetTime)) {
+            duration = Duration.between(targetTime, currentTime);
+            Bukkit.broadcastMessage("CURRENT : " +currentTime.getHour() + ":" +currentTime.getMinute());
+            Bukkit.broadcastMessage("TARGET : " +targetTime.getHour()+":"+targetTime.getMinute());
+            Bukkit.broadcastMessage("DIFF : " + duration.toMinutes()%60);
+            Bukkit.broadcastMessage("------------------------------------");
+            targetTime = LocalTime.of((int) (23-duration.toHours()), (int) (59-(duration.toMinutes()%60)),59);
+            currentTime =LocalTime.of(0, 0);
+
+        }
+        duration = Duration.between(currentTime, targetTime);
+        Bukkit.broadcastMessage("CURRENT2 : " +currentTime.getHour() + ":" +currentTime.getMinute());
+        Bukkit.broadcastMessage("TARGET2 : " +targetTime.getHour()+":"+targetTime.getMinute());
+        Bukkit.broadcastMessage("DIFF2 : " + duration.toMinutes()%60);
+        Bukkit.broadcastMessage("Duration: " + Math.abs(duration.toMillis()));
+        Bukkit.broadcastMessage("------------------------------------");
+        return Math.abs(duration.toMillis());
+
+    }
+
     public static String convertTime(long millis) {
         int seconds = (int) (millis / 1000) % 60;
         int minutes = (int) ((millis / (1000 * 60)) % 60);
@@ -108,7 +136,7 @@ public class XSUtils {
             }
         }
 
-        if(timer.length() == 0) {
+        if(timer.isEmpty()) {
             timer += XSUtils.getMessagesConfig("time.soon");
         }
 

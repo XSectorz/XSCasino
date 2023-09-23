@@ -56,6 +56,7 @@ configuration:
   start_pot: 10000
   pot_extra: 750 #per ticket buy
   prize_time: 20 #prize time in secs
+  redis_timer: "20:00" #if you use XSCasinoRedis and enabled it set time as XSCasinoRedis config
 
 myTicket_configuration:
   title: "&8My Tickets"
