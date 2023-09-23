@@ -200,12 +200,12 @@ public class ui_main_lottery implements Listener {
                                 } else {
                                     XSHandlers.XSLottery.addPotPrize(amount);
                                     XSHandlers.XSLottery.setAmountTicket(XSHandlers.XSLottery.getAmountTicket()+amount);
-                                }
-                                if(XSHandlers.XSLottery.getLotteryList().containsKey(ticket)) {
-                                    XSHandlers.XSLottery.getLotteryList().replace(ticket,
-                                            XSHandlers.XSLottery.getLotteryList().get(ticket)+amount);
-                                } else {
-                                    XSHandlers.XSLottery.getLotteryList().put(ticket,amount);
+                                    if(XSHandlers.XSLottery.getLotteryList().containsKey(ticket)) {
+                                        XSHandlers.XSLottery.getLotteryList().replace(ticket,
+                                                XSHandlers.XSLottery.getLotteryList().get(ticket)+amount);
+                                    } else {
+                                        XSHandlers.XSLottery.getLotteryList().put(ticket,amount);
+                                    }
                                 }
                                 if(XSHandlers.XSLottery.getXsLotteryUserOpenUI().containsKey(p.getUniqueId())) {
                                     XSHandlers.XSLottery.getXsLotteryUserOpenUI().remove(p.getUniqueId());

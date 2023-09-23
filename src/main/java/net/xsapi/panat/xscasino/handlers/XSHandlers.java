@@ -128,8 +128,6 @@ public class XSHandlers {
             createUserTable();
         }
 
-        //Check is redis server available
-        XSHandlers.sendMessageToRedisAsync("XSCasinoRedisData/XSLottery/CheckStatus/"+ XSHandlers.getHostCrossServer() + "/" + XSHandlers.getLocalRedis(),XSHandlers.getLocalRedis());
     }
 
     private static void subscribeToChannelAsync(String channelName) {
@@ -257,7 +255,8 @@ public class XSHandlers {
         if(getUsingSQL()) {
             XSLottery.createSQL(getJDBC_URL(),getUSER(),getPASS());
         }
-
+        //Check is redis server available
+        XSHandlers.sendMessageToRedisAsync("XSCasinoRedisData/XSLottery/CheckStatus/"+ XSHandlers.getHostCrossServer() + "/" + XSHandlers.getLocalRedis(),XSHandlers.getLocalRedis());
         Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f[XSCasino] loaded §x§6§0§F§F§0§0100% §x§f§f§a§c§2§fcomplete!");
 
     }
