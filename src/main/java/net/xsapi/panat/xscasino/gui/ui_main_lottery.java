@@ -130,7 +130,7 @@ public class ui_main_lottery implements Listener {
             else if(XSHandlers.XSLottery.getCustomConfig().getStringList("contents.buy_ticket.slots").contains(String.valueOf(e.getSlot()))) {
                 p.closeInventory();
                 if(XSHandlers.getUsingRedis()) {
-                    Bukkit.broadcastMessage("Can buy: " + XSHandlers.XSLottery.isBuyAble());
+                    //Bukkit.broadcastMessage("Can buy: " + XSHandlers.XSLottery.isBuyAble());
                     if(!XSHandlers.XSLottery.isBuyAble()) {
                         XSUtils.sendMessages(p,"redis_not_connect");
                         return;
