@@ -142,8 +142,8 @@ public class XSHandlers {
                         if (Thread.currentThread().isInterrupted()) {
                             return;
                         }
-                        Bukkit.getConsoleSender().sendMessage("Recieved Data (send from client) --> " + message);
-                        Bukkit.getConsoleSender().sendMessage("--------------------");
+                        //Bukkit.getConsoleSender().sendMessage("Recieved Data (send from client) --> " + message);
+                        //Bukkit.getConsoleSender().sendMessage("--------------------");
                         if(channel.equalsIgnoreCase("XSCasinoRedisData/XSLottery/Update/"+ getHostCrossServer())) {
                             XSLottery.redisConvertObject(message);
                         } else if(channel.equalsIgnoreCase("XSCasinoRedisData/XSLottery/EndPrizeNumber/"+ getHostCrossServer())) {
@@ -215,7 +215,7 @@ public class XSHandlers {
 
     public static void sendDataObjectRedis(String CHName,String lottery) {
         XSHandlers.sendMessageToRedisAsync(CHName,lottery);
-        Bukkit.broadcastMessage("Client Send.... From " + CHName);
+       // Bukkit.broadcastMessage("Client Send.... From " + CHName);
     }
 
     private static void createUserTable() {

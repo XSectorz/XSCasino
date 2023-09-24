@@ -70,6 +70,17 @@ public class XSCommand implements CommandExecutor {
                             XSUtils.sendMessages(sender,"set_lock_success");
                             return true;
                         }
+                    } else if(args[0].equalsIgnoreCase("help")) {
+                        if(!sender.hasPermission("xsapi.xscasino.help")) {
+                            XSUtils.sendMessages(sender,"no_permission");
+                            return false;
+                        }
+
+                        for(String str : XSUtils.messagesList("commands_list")) {
+                            XSUtils.sendReplaceComponents(sender,str);
+                        }
+
+                        return true;
                     }
                 }
 

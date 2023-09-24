@@ -76,20 +76,11 @@ public class XSUtils {
         Duration duration;
         if (currentTime.isAfter(targetTime)) {
             duration = Duration.between(targetTime, currentTime);
-            Bukkit.broadcastMessage("CURRENT : " +currentTime.getHour() + ":" +currentTime.getMinute());
-            Bukkit.broadcastMessage("TARGET : " +targetTime.getHour()+":"+targetTime.getMinute());
-            Bukkit.broadcastMessage("DIFF : " + duration.toMinutes()%60);
-            Bukkit.broadcastMessage("------------------------------------");
             targetTime = LocalTime.of((int) (23-duration.toHours()), (int) (59-(duration.toMinutes()%60)),59);
             currentTime =LocalTime.of(0, 0);
 
         }
         duration = Duration.between(currentTime, targetTime);
-        Bukkit.broadcastMessage("CURRENT2 : " +currentTime.getHour() + ":" +currentTime.getMinute());
-        Bukkit.broadcastMessage("TARGET2 : " +targetTime.getHour()+":"+targetTime.getMinute());
-        Bukkit.broadcastMessage("DIFF2 : " + duration.toMinutes()%60);
-        Bukkit.broadcastMessage("Duration: " + Math.abs(duration.toMillis()));
-        Bukkit.broadcastMessage("------------------------------------");
         return Math.abs(duration.toMillis());
 
     }

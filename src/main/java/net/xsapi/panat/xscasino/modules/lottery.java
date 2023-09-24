@@ -271,7 +271,7 @@ public class lottery extends XSCasinoTemplates {
                 }
 
                 if(XSHandlers.getUsingRedis()) {
-                    Bukkit.broadcastMessage("Start up Requesting data from redis...");
+                    //Bukkit.broadcastMessage("Start up Requesting data from redis...");
                     Bukkit.getScheduler().scheduleSyncDelayedTask(XSCasino.getPlugin(), new Runnable() {
                         @Override
                         public void run() {
@@ -293,12 +293,18 @@ public class lottery extends XSCasinoTemplates {
                     }
                 }
 
-                if(Integer.parseInt(lockPrize) != -1) {
-                    setLockPrize(Integer.parseInt(lockPrize));
-                    setSetterName(lockSetter);
-                } else {
-                    setLockPrize(-1);
-                    setSetterName("");
+                setLockPrize(-1);
+                setSetterName("");
+
+                if(!lockPrize.isEmpty()) {
+                    try {
+                        if (Integer.parseInt(lockPrize) != -1) {
+                            setLockPrize(Integer.parseInt(lockPrize));
+                            setSetterName(lockSetter);
+                        }
+                    } catch (NumberFormatException ignored) {
+
+                    }
                 }
 
 
@@ -713,7 +719,7 @@ public class lottery extends XSCasinoTemplates {
 
         lotteryList.putAll(resultMap);
         setAmountTicket(currentTicket);
-        Bukkit.broadcastMessage("Load Data from Redis Successfully");
+        //Bukkit.broadcastMessage("Load Data from Redis Successfully");
     }
 
     public void calculatePrizeRedis(String message) {
