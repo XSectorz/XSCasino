@@ -104,7 +104,6 @@ public class XSUser {
                                 int amount = Integer.parseInt(lottery.trim().split(":")[1]);
                                 getLottery().put(key,amount);
                             }
-                            Bukkit.getLogger().info("Load lottery success");
                         }
                     }
                 }
@@ -118,7 +117,12 @@ public class XSUser {
     public void loadUserData() {
 
         if(XSHandlers.getUsingSQL()) {
-            loadSQLUserData();
+            Bukkit.getScheduler().scheduleSyncDelayedTask(XSCasino.getPlugin(), new Runnable() {
+                @Override
+                public void run() {
+                    loadSQLUserData();
+                }
+            }, 20L);
         } else {
             for(String lottery : this.userConfig.getStringList("modules.lottery.data")) {
                 int ticket = Integer.parseInt(lottery.split(":")[0]);
