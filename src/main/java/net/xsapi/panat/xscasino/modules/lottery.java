@@ -719,6 +719,7 @@ public class lottery extends XSCasinoTemplates {
 
         lotteryList.putAll(resultMap);
         setAmountTicket(currentTicket);
+        setPotPrize((long) (getPotPrize() + getAmountTicket()*getPotExtra()));
         //Bukkit.broadcastMessage("Load Data from Redis Successfully");
     }
 
