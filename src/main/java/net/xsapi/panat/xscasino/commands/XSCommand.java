@@ -45,6 +45,11 @@ public class XSCommand implements CommandExecutor {
                 } else if(args.length == 3) {
                     if(args[0].equalsIgnoreCase("lottery")) {
                         if(args[1].equalsIgnoreCase("setLock")) {
+                            if(!sender.hasPermission("xsapi.xscasino.admin")) {
+                                XSUtils.sendMessages(sender,"no_permission");
+                                return false;
+                            }
+
                             int data = 0;
 
                             try {
