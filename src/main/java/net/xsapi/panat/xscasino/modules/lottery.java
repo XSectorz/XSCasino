@@ -442,36 +442,31 @@ public class lottery extends XSCasinoTemplates {
         try {
             Connection connection = DriverManager.getConnection(JDBC_URL,USER,PASS);
 
-            DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, XSHandlers.getTableLottery(), null);
-            boolean tableExists = resultSet.next();
+            Statement statement = connection.createStatement();
 
-            if(!tableExists) {
-                Statement statement = connection.createStatement();
+            String createTableQuery = "CREATE TABLE IF NOT EXISTS " + XSHandlers.getTableLottery() + " ("
+                    + "lotteryList TEXT DEFAULT '[]', "
+                    + "NextPrizeTime BIGINT DEFAULT 0, "
+                    + "winnerName VARCHAR(16) DEFAULT '', "
+                    + "winnerNumber VARCHAR(2) DEFAULT '', "
+                    + "winnerNumberTicket VARCHAR(10) DEFAULT '', "
+                    + "winnerPrize VARCHAR(20) DEFAULT '', "
+                    + "lockPrize VARCHAR(2) DEFAULT '', "
+                    + "lockSetter VARCHAR(16) DEFAULT ''"
+                    + ")";
 
-                String createTableQuery = "CREATE TABLE " + XSHandlers.getTableLottery() + " ("
-                        + "lotteryList TEXT DEFAULT '[]', "
-                        + "NextPrizeTime BIGINT DEFAULT 0, "
-                        + "winnerName VARCHAR(16) DEFAULT '', "
-                        + "winnerNumber VARCHAR(2) DEFAULT '', "
-                        + "winnerNumberTicket VARCHAR(10) DEFAULT '', "
-                        + "winnerPrize VARCHAR(20) DEFAULT '', "
-                        + "lockPrize VARCHAR(2) DEFAULT '', "
-                        + "lockSetter VARCHAR(16) DEFAULT ''"
-                        + ")";
-
-                statement.executeUpdate(createTableQuery);
+            statement.executeUpdate(createTableQuery);
 
 
-                Statement statementInsert = connection.createStatement();
+            Statement statementInsert = connection.createStatement();
 
-                String insertQuery = "INSERT INTO " + XSHandlers.getTableLottery() + " (lotteryList) "
-                        + "VALUES ('[]')";
+            String insertQuery = "INSERT INTO " + XSHandlers.getTableLottery() + " (lotteryList) "
+                    + "VALUES ('[]')";
 
-                statementInsert.executeUpdate(insertQuery);
-                statementInsert.close();
-                statement.close();
-            }
+            statementInsert.executeUpdate(insertQuery);
+            statementInsert.close();
+
+            statement.close();
             connection.close();
 
             Bukkit.getConsoleSender().sendMessage("§x§E§7§F§F§0§0[XSCasino] Lottery Database : §x§6§0§F§F§0§0Connected");
