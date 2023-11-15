@@ -5,5 +5,6 @@ public class configLoader {
         new config().loadConfigu();
         new messages().loadConfigu();
         new lotteryConfig().loadConfigu();
+        new tokenConfig().loadConfigu();
     }
 }

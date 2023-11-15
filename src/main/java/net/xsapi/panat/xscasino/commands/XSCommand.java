@@ -1,7 +1,9 @@
 package net.xsapi.panat.xscasino.commands;
 
-import net.kyori.adventure.audience.Audience;
+import net.xsapi.panat.xscasino.modules.token;
+import net.xsapi.panat.xscasino.types.TokenType;
 import net.xsapi.panat.xscasino.gui.ui_main_lottery;
+import net.xsapi.panat.xscasino.gui.ui_main_token;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
 import net.xsapi.panat.xscasino.handlers.XSUtils;
 import org.bukkit.Bukkit;
@@ -9,6 +11,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class XSCommand implements CommandExecutor {
     @Override
@@ -40,6 +43,16 @@ public class XSCommand implements CommandExecutor {
 
                         ui_main_lottery.openLotteryGUI(sender);
 
+                        return true;
+                    } else if(args[0].equalsIgnoreCase("token")) {
+
+                        if(!sender.hasPermission("xsapi.xscasino.token")) {
+
+                            XSUtils.sendMessages(sender,"no_permission");
+                            return false;
+                        }
+
+                        ui_main_token.openTokenMenu(sender);
                         return true;
                     }
                 } else if(args.length == 3) {
@@ -86,6 +99,46 @@ public class XSCommand implements CommandExecutor {
                         }
 
                         return true;
+                    } else if(args[0].equalsIgnoreCase("token")) {
+
+                        if(!sender.hasPermission("xsapi.xscasino.admin")) {
+                            XSUtils.sendMessages(sender,"no_permission");
+                            return false;
+                        }
+
+                        if(args[1].equalsIgnoreCase("setItem")) {
+                            String type = args[2].toString();
+
+                            TokenType tokenType = null;
+
+                            if(type.equalsIgnoreCase("100")) {
+                                tokenType = TokenType.TOKEN_100;
+                            } else if(type.equalsIgnoreCase("1000")) {
+                                tokenType = TokenType.TOKEN_1000;
+                            } else if(type.equalsIgnoreCase("10000")) {
+                                tokenType = TokenType.TOKEN_10000;
+                            }
+                            ItemStack it = sender.getInventory().getItemInMainHand();
+
+                            switch (tokenType) {
+                                case TOKEN_100:
+                                    token.setToken100(it);
+                                    break;
+                                case TOKEN_1000:
+                                    token.setToken1000(it);
+                                    break;
+                                case TOKEN_10000:
+                                    token.setToken10000(it);
+                                    break;
+                                default:
+                                    break;
+
+                            }
+
+                            sender.sendMessage("Setup success");
+                            return true;
+
+                        }
                     }
                 }
 

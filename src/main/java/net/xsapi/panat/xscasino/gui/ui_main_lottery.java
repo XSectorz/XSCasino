@@ -143,13 +143,16 @@ public class ui_main_lottery implements Listener {
                         .stripColor()
                         .onFinish((lines) -> {
                             if (!lines[1].isEmpty() && !lines[2].isEmpty() && !lines[2].equalsIgnoreCase("-1")) {
-                                int ticket = Integer.parseInt(lines[1]);
+                                int ticket = 0;
                                 int amount = 0;
 
                                 try {
+                                    ticket = Integer.parseInt(lines[1]);
                                     amount = Integer.parseInt(lines[2]);
+                                    //Bukkit.broadcastMessage("" + ticket);
                                 } catch (NumberFormatException nf) {
                                     XSUtils.sendMessages(p,"inputNAN");
+                                    //Bukkit.broadcastMessage("Err " + ticket);
                                     return null;
                                 }
 

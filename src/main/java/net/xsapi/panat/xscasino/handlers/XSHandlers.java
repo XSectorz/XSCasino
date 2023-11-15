@@ -10,9 +10,11 @@ import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.events.joinEvent;
 import net.xsapi.panat.xscasino.events.leaveEvent;
 import net.xsapi.panat.xscasino.gui.ui_main_lottery;
+import net.xsapi.panat.xscasino.gui.ui_main_token;
 import net.xsapi.panat.xscasino.gui.ui_myticket_lottery;
 import net.xsapi.panat.xscasino.gui.ui_topticket_lottery;
 import net.xsapi.panat.xscasino.modules.lottery;
+import net.xsapi.panat.xscasino.modules.token;
 import net.xsapi.panat.xscasino.user.UserData;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
@@ -255,6 +257,10 @@ public class XSHandlers {
         if(getUsingSQL()) {
             XSLottery.createSQL(getJDBC_URL(),getUSER(),getPASS());
         }
+
+        //Token Modules
+        token.setupDefault();
+
         //Check is redis server available
         XSHandlers.sendMessageToRedisAsync("XSCasinoRedisData/XSLottery/CheckStatus/"+ XSHandlers.getHostCrossServer() + "/" + XSHandlers.getLocalRedis(),XSHandlers.getLocalRedis());
         Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f[XSCasino] loaded §x§6§0§F§F§0§0100% §x§f§f§a§c§2§fcomplete!");
@@ -267,6 +273,7 @@ public class XSHandlers {
 
     public static void saveXSCasinoModules() {
         XSLottery.saveData();
+        token.saveData();
     }
 
     public static void saveUserData() {
@@ -353,7 +360,10 @@ public class XSHandlers {
         Bukkit.getPluginManager().registerEvents(new ui_main_lottery(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new ui_topticket_lottery(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new ui_myticket_lottery(), XSCasino.getPlugin());
+        Bukkit.getPluginManager().registerEvents(new ui_main_token(), XSCasino.getPlugin());
     }
+
+
 
 
 }
