@@ -54,7 +54,18 @@ public class XSCommand implements CommandExecutor {
 
                         ui_main_token.openTokenMenu(sender);
                         return true;
+                    } else if(args[0].equalsIgnoreCase("help")) {
+
+                        if(!sender.hasPermission("xsapi.xscasino.help")) {
+                            XSUtils.sendMessages(sender,"no_permission");
+                            return false;
+                        }
+                        for(String str : XSUtils.messagesList("commands_list")) {
+                            XSUtils.sendReplaceComponents(sender,str);
+                        }
+                        return true;
                     }
+
                 } else if(args.length == 3) {
                     if(args[0].equalsIgnoreCase("lottery")) {
                         if(args[1].equalsIgnoreCase("setLock")) {
