@@ -1,5 +1,6 @@
 package net.xsapi.panat.xscasino.commands;
 
+import net.xsapi.panat.xscasino.gui.ui_module_roulette;
 import net.xsapi.panat.xscasino.modules.token;
 import net.xsapi.panat.xscasino.types.TokenType;
 import net.xsapi.panat.xscasino.gui.ui_main_lottery;
@@ -63,6 +64,14 @@ public class XSCommand implements CommandExecutor {
                         for(String str : XSUtils.messagesList("commands_list")) {
                             XSUtils.sendReplaceComponents(sender,str);
                         }
+                        return true;
+                    } else if(args[0].equalsIgnoreCase("roulete")) {
+                        if(!sender.hasPermission("xsapi.xscasino.roulete")) {
+
+                            XSUtils.sendMessages(sender,"no_permission");
+                            return false;
+                        }
+                        ui_module_roulette.openRoulette(sender);
                         return true;
                     }
 

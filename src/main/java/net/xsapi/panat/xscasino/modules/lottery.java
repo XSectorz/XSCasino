@@ -25,8 +25,6 @@ import static net.xsapi.panat.xscasino.gui.ui_main_lottery.updateInventory;
 
 public class lottery extends XSCasinoTemplates {
 
-    public int invSize;
-    public String title;
     public HashMap<Integer,Integer> lotteryList = new HashMap<>();
     public HashMap<UUID, Inventory> xsLotteryUserOpenUI = new HashMap<>();
     public double priceTicket;
@@ -816,22 +814,6 @@ public class lottery extends XSCasinoTemplates {
 
     public HashMap<Integer, Integer> getLotteryList() {
         return lotteryList;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setInvSize(int invSize) {
-        this.invSize = invSize;
-    }
-
-    public int getInvSize() {
-        return invSize;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
 }

@@ -1,7 +1,6 @@
 package net.xsapi.panat.xscasino.gui;
 
 import de.rapha149.signgui.SignGUI;
-import net.xsapi.panat.xscasino.configuration.messages;
 import net.xsapi.panat.xscasino.configuration.tokenConfig;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
 import net.xsapi.panat.xscasino.handlers.XSUtils;

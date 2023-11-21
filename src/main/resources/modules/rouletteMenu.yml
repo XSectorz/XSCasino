@@ -1,0 +1,152 @@
+configuration:
+  title: "&8Roulette"
+  inventorySize: 54
+  backgroundSlot:
+    - 5
+    - 10
+    - 12
+    - 14
+    - 15
+    - 16
+    - 17
+    - 19
+    - 21
+    - 23
+    - 28
+    - 29
+    - 30
+    - 32
+    - 33
+    - 34
+    - 35
+    - 41
+    - 45
+    - 46
+    - 47
+    - 48
+    - 49
+    - 50
+    - 51
+    - 52
+    - 53
+
+module_configuration:
+  randOption:
+    randIndex: "2,1,0,9,18,27,36,37,38,39,40,31,22,13,4,3"
+    winIndex: 2
+  selected:
+    name_selected: "&fสีที่เลือก : {color}"
+    name_not_select: "&x&E&0&1&A&3&2กรุณาเลือกสี"
+    material_not_select: BARRIER
+    model_not_select: 0
+    slots:
+      - 20
+  randSlot:
+    green:
+      material: GREEN_WOOL
+      color: "&x&E&4&A&5&1&A&l"
+      multiple: 20
+      slots:
+        - 2
+    red:
+      material: RED_WOOL
+      color: "&x&D&9&D&B&2&8&l"
+      multiple: 2
+      slots:
+        - 1
+        - 3
+        - 9
+        - 13
+        - 27
+        - 31
+        - 37
+        - 39
+    black:
+      material: BLACK_WOOL
+      color: "&x&D&9&D&B&2&8&l"
+      multiple: 2
+      slots:
+        - 0
+        - 4
+        - 18
+        - 22
+        - 36
+        - 38
+        - 40
+
+background_contents:
+  Material: "PAPER"
+  customModelData: 10230
+  amount: 1
+  display: "&r"
+  lore: [ ]
+
+contents:
+  close:
+    Material: "PAPER"
+    customModelData: 10224
+    amount: 1
+    display: "&x&B&8&2&8&3&Aปิดหน้าเมนู"
+    lore: []
+    slots:
+      - 44
+  getArrow:
+    Material: "PAPER"
+    customModelData: 10213
+    amount: 1
+    display: "&x&E&B&E&5&2&6สิ่งที่ได้รับ"
+    lore: []
+    slots:
+      - 11
+  info:
+    Material: "PAPER"
+    customModelData: 10237
+    amount: 1
+    display: "&x&E&B&E&5&2&6เกี่ยวกับระบบ"
+    lore:
+      - "&r"
+      - "&x&B&5&B&B&4&7วิธีการชนะ"
+      - "&7หากสีที่คุณเลือกตรงกับที่ระบบสุ่มให้"
+      - "&7คุณจะได้รับรางวัลเป็นโทเคนกลับคืนมา"
+      - "&r"
+      - "&x&B&5&B&B&4&7วิธีการเล่น"
+      - "&8[&x&B&5&B&B&4&71&8] &7เลือกสีที่ท่านต้องการเสี่ยงดวง"
+      - "&8[&x&B&5&B&B&4&72&8] &7ใส่โทเคนที่จะเดิมพันลงช่องทางด้านบน"
+      - "&8[&x&B&5&B&B&4&73&8] &7กดปุ่มเริ่มเล่นเพื่อดำเนินการเล่น"
+    slots:
+      - 43
+  play:
+    Material: "PAPER"
+    customModelData: 10222
+    amount: 1
+    display: "&x&5&2&B&B&4&7เริ่มเล่น"
+    lore: []
+    slots:
+      - 42
+  red_item:
+    Material: "RED_WOOL"
+    customModelData: 0
+    amount: 1
+    display: "&x&E&0&1&A&3&2สีแดง"
+    lore:
+      - "&f คลิก-ซ้าย เพื่อเลือก"
+    slots:
+      - 6
+  black_item:
+    Material: "BLACK_WOOL"
+    customModelData: 0
+    amount: 1
+    display: "&x&4&7&4&5&4&6สีดำ"
+    lore:
+      - "&f คลิก-ซ้าย เพื่อเลือก"
+    slots:
+      - 7
+  green_item:
+    Material: "GREEN_WOOL"
+    customModelData: 0
+    amount: 1
+    display: "&x&2&D&6&D&3&4สีเขียว"
+    lore:
+      - "&f คลิก-ซ้าย เพื่อเลือก"
+    slots:
+      - 8

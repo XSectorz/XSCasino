@@ -2,6 +2,7 @@ package net.xsapi.panat.xscasino.user;
 
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
+import net.xsapi.panat.xscasino.types.RouletteType;
 import net.xsapi.panat.xscasino.types.TokenType;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -21,6 +22,7 @@ public class XSUser {
     private HashMap<Integer,Integer> lottery = new HashMap<>();
 
     private TokenType tokenType;
+    private RouletteType rouletteType;
 
     private File userFile;
     private FileConfiguration userConfig;
@@ -47,6 +49,14 @@ public class XSUser {
 
     public TokenType getTokenType() {
         return tokenType;
+    }
+
+    public void setRouletteType(RouletteType rouletteType) {
+        this.rouletteType = rouletteType;
+    }
+
+    public RouletteType getRouletteType() {
+        return rouletteType;
     }
 
     public void createUser() {

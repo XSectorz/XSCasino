@@ -6,7 +6,8 @@ import java.io.File;
 
 public class XSCasinoTemplates {
 
-    private String name;
+    public int invSize;
+    public String title;
     private File customConfigFile;
     private FileConfiguration customConfig;
 
@@ -18,10 +19,6 @@ public class XSCasinoTemplates {
         this.customConfigFile = customConfigFile;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public File getCustomConfigFile() {
         return customConfigFile;
     }
@@ -30,8 +27,21 @@ public class XSCasinoTemplates {
         return customConfig;
     }
 
-    public String getName() {
-        return name;
+    public void setTitle(String title) {
+        this.title = title;
     }
+
+    public void setInvSize(int invSize) {
+        this.invSize = invSize;
+    }
+
+    public int getInvSize() {
+        return invSize;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
 
 }

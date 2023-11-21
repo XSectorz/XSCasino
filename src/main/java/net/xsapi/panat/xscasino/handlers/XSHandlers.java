@@ -1,26 +1,22 @@
 package net.xsapi.panat.xscasino.handlers;
 
-import com.google.gson.Gson;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import net.xsapi.panat.xscasino.configuration.config;
 import net.xsapi.panat.xscasino.configuration.lotteryConfig;
-import net.xsapi.panat.xscasino.configuration.messages;
+import net.xsapi.panat.xscasino.configuration.rouletteConfig;
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.events.joinEvent;
 import net.xsapi.panat.xscasino.events.leaveEvent;
-import net.xsapi.panat.xscasino.gui.ui_main_lottery;
-import net.xsapi.panat.xscasino.gui.ui_main_token;
-import net.xsapi.panat.xscasino.gui.ui_myticket_lottery;
-import net.xsapi.panat.xscasino.gui.ui_topticket_lottery;
+import net.xsapi.panat.xscasino.gui.*;
 import net.xsapi.panat.xscasino.modules.lottery;
+import net.xsapi.panat.xscasino.modules.roulette;
 import net.xsapi.panat.xscasino.modules.token;
 import net.xsapi.panat.xscasino.user.UserData;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.scheduler.BukkitRunnable;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
@@ -51,6 +47,7 @@ public class XSHandlers {
     private static String TABLE_LOTTERY = "xscasino_lottery";
     private static String TABLE_XSPLAYER = "xscasino_user";
 
+    public static roulette XSRoullete;
     public static lottery XSLottery;
     public static HashMap<UUID, XSUser> xsCasinoUser = new HashMap<>();
     private static HashMap<UUID, UserData> userData = new HashMap<>();
@@ -253,6 +250,7 @@ public class XSHandlers {
     public static void loadXSCasinoModules() {
         Bukkit.getConsoleSender().sendMessage("§x§f§f§a§c§2§f[XSCasino] trying to load data...");
         XSLottery = new lottery(lotteryConfig.customConfigFile,lotteryConfig.customConfig);
+        XSRoullete = new roulette(rouletteConfig.customConfigFile,rouletteConfig.customConfig);
 
         if(getUsingSQL()) {
             XSLottery.createSQL(getJDBC_URL(),getUSER(),getPASS());
@@ -361,6 +359,7 @@ public class XSHandlers {
         Bukkit.getPluginManager().registerEvents(new ui_topticket_lottery(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new ui_myticket_lottery(), XSCasino.getPlugin());
         Bukkit.getPluginManager().registerEvents(new ui_main_token(), XSCasino.getPlugin());
+        Bukkit.getPluginManager().registerEvents(new ui_module_roulette(), XSCasino.getPlugin());
     }
 
 
