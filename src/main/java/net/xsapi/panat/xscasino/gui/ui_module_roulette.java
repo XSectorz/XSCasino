@@ -129,6 +129,20 @@ public class ui_module_roulette implements Listener {
                 xsUser.setRouletteType(RouletteType.BLACK);
             } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.green_item.slots").contains(String.valueOf(e.getSlot()))) {
                 xsUser.setRouletteType(RouletteType.GREEN);
+            } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.play.slots").contains(String.valueOf(e.getSlot()))) {
+                xsUser.setCurrentRouletteCount(0);
+                xsUser.setMaxRouletteCount(1);
+                xsUser.setCurrentRouletteCheck(0);
+                xsUser.setMaxRouletteCheck(50);
+                xsUser.setRouletteUpdateCount(0);
+                xsUser.setRouletteMaxUpdateCount(20);
+
+                if(!XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
+                    XSHandlers.XSRoullete.getPlayerStartRoulette().add(p);
+                    p.sendMessage("Play...");
+                }
+
+
             }
 
             updateInventory(p);

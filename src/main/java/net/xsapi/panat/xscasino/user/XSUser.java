@@ -24,6 +24,13 @@ public class XSUser {
     private TokenType tokenType;
     private RouletteType rouletteType;
 
+    public int currentRouletteCount = 0;
+    public int maxRouletteCount = 0;
+    public int currentRouletteCheck = 0;
+    public int maxRouletteCheck = 0;
+    public int rouletteUpdateCount = 0;
+    public int rouletteMaxUpdateCount = 0;
+
     private File userFile;
     private FileConfiguration userConfig;
 
@@ -51,8 +58,56 @@ public class XSUser {
         return tokenType;
     }
 
+    public void setRouletteMaxUpdateCount(int rouletteMaxUpdateCount) {
+        this.rouletteMaxUpdateCount = rouletteMaxUpdateCount;
+    }
+
+    public int getRouletteMaxUpdateCount() {
+        return rouletteMaxUpdateCount;
+    }
+
+    public void setRouletteUpdateCount(int rouletteUpdateCount) {
+        this.rouletteUpdateCount = rouletteUpdateCount;
+    }
+
+    public int getRouletteUpdateCount() {
+        return rouletteUpdateCount;
+    }
+
     public void setRouletteType(RouletteType rouletteType) {
         this.rouletteType = rouletteType;
+    }
+
+    public void setCurrentRouletteCheck(int currentRouletteCheck) {
+        this.currentRouletteCheck = currentRouletteCheck;
+    }
+
+    public int getCurrentRouletteCheck() {
+        return currentRouletteCheck;
+    }
+
+    public void setMaxRouletteCheck(int maxRouletteCheck) {
+        this.maxRouletteCheck = maxRouletteCheck;
+    }
+
+    public int getMaxRouletteCheck() {
+        return maxRouletteCheck;
+    }
+
+    public int getCurrentRouletteCount() {
+        return currentRouletteCount;
+    }
+
+    public void setCurrentRouletteCount(int currentRouletteCount) {
+        this.currentRouletteCount = currentRouletteCount;
+    }
+
+    public int getMaxRouletteCount() {
+        return maxRouletteCount;
+    }
+
+    public void setMaxRouletteCount(int maxRouletteCount) {
+        this.maxRouletteCount = maxRouletteCount;
     }
 
     public RouletteType getRouletteType() {
