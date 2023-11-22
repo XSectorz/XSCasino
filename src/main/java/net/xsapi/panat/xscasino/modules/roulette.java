@@ -4,8 +4,11 @@ import net.xsapi.panat.xscasino.configuration.messages;
 import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
 import net.xsapi.panat.xscasino.handlers.XSUtils;
+import net.xsapi.panat.xscasino.types.RouletteType;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -86,11 +89,12 @@ public class roulette extends XSCasinoTemplates{
                     xsUser.setCurrentRouletteCount(xsUser.getCurrentRouletteCount()+1);
 
                     if(xsUser.getCurrentRouletteCount() >= xsUser.getMaxRouletteCount()) {
-                        p.sendMessage("Update...");
+                        //p.sendMessage("Update...");
                         xsUser.setCurrentRouletteCount(0);
                         xsUser.setCurrentRouletteCheck(xsUser.getCurrentRouletteCheck()+1);
                         xsUser.setRouletteUpdateCount(xsUser.getRouletteUpdateCount()+1);
                         updateInventoryRoulette(p,newItemInventory);
+                        p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,5f,5f);
                     }
 
                     if(xsUser.getRouletteUpdateCount() >= xsUser.getRouletteMaxUpdateCount()) { //Increase delay
@@ -99,12 +103,29 @@ public class roulette extends XSCasinoTemplates{
                         xsUser.setRouletteUpdateCount(0);
                         if(xsUser.getRouletteMaxUpdateCount() > 5) {
                             xsUser.setRouletteMaxUpdateCount(xsUser.getRouletteMaxUpdateCount()-5);
-                            p.sendMessage("Increase delayed " + xsUser.getMaxRouletteCount());
+                            //p.sendMessage("Increase delayed " + xsUser.getMaxRouletteCount());
                         }
                     }
 
                     if(xsUser.getCurrentRouletteCheck() >= xsUser.getMaxRouletteCheck()) { //End
-                        p.sendMessage("Rand End");
+                        p.sendMessage("Rand End" + newItemInventory.get(winIndex).getType());
+
+                        Material mat = Material.AIR;
+
+                        if(xsUser.getRouletteType().equals(RouletteType.RED)) {
+                            mat = Material.RED_WOOL;
+                        } else if(xsUser.getRouletteType().equals(RouletteType.GREEN)) {
+                            mat = Material.GREEN_WOOL;
+                        } else if(xsUser.getRouletteType().equals(RouletteType.BLACK)) {
+                            mat = Material.BLACK_WOOL;
+                        }
+
+                        if(newItemInventory.get(winIndex).getType().equals(mat)) {
+                            p.playSound(p.getLocation(),Sound.ENTITY_VILLAGER_CELEBRATE,5f,3f);
+                        } else {
+                            p.playSound(p.getLocation(),Sound.ENTITY_WITHER_DEATH,5f,3f);
+                        }
+
                         iterator.remove();
                     }
 
