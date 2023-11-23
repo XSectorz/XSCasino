@@ -121,9 +121,9 @@ public class roulette extends XSCasinoTemplates{
                         }
 
                         if(newItemInventory.get(winIndex).getType().equals(mat)) {
-                            p.playSound(p.getLocation(),Sound.ENTITY_VILLAGER_CELEBRATE,5f,3f);
+                            p.playSound(p.getLocation(),Sound.ENTITY_PLAYER_LEVELUP,5f,2f);
                         } else {
-                            p.playSound(p.getLocation(),Sound.ENTITY_WITHER_DEATH,5f,3f);
+                            p.playSound(p.getLocation(),Sound.ENTITY_WITHER_DEATH,5f,2f);
                         }
 
                         iterator.remove();

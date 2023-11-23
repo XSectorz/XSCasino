@@ -34,6 +34,11 @@ module_configuration:
   randOption:
     randIndex: "2,1,0,9,18,27,36,37,38,39,40,31,22,13,4,3"
     winIndex: 2
+  tokenSlot:
+    slots:
+      - 24
+      - 25
+      - 26
   selected:
     name_selected: "&fสีที่เลือก : {color}"
     name_not_select: "&x&E&0&1&A&3&2กรุณาเลือกสี"

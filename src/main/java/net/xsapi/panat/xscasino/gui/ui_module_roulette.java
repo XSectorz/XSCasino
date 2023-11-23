@@ -1,8 +1,10 @@
 package net.xsapi.panat.xscasino.gui;
 
 import net.xsapi.panat.xscasino.configuration.rouletteConfig;
+import net.xsapi.panat.xscasino.core.XSCasino;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
 import net.xsapi.panat.xscasino.handlers.XSUtils;
+import net.xsapi.panat.xscasino.modules.token;
 import net.xsapi.panat.xscasino.types.RouletteType;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
@@ -12,10 +14,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
 
 public class ui_module_roulette implements Listener {
@@ -116,38 +120,97 @@ public class ui_module_roulette implements Listener {
         Player p = (Player) e.getWhoClicked();
 
         if (e.getView().getTitle().equalsIgnoreCase(XSHandlers.XSRoullete.getTitle())) {
-            if(e.getSlot() < 0) {
+
+            if(e.getClickedInventory() == null) {
                 return;
             }
-            XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
 
-            if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.close.slots").contains(String.valueOf(e.getSlot()))) {
-                p.closeInventory();
-            } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.red_item.slots").contains(String.valueOf(e.getSlot()))) {
-                xsUser.setRouletteType(RouletteType.RED);
-            } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.black_item.slots").contains(String.valueOf(e.getSlot()))) {
-                xsUser.setRouletteType(RouletteType.BLACK);
-            } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.green_item.slots").contains(String.valueOf(e.getSlot()))) {
-                xsUser.setRouletteType(RouletteType.GREEN);
-            } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.play.slots").contains(String.valueOf(e.getSlot()))) {
-                int randNum = (int) ((Math.random() * (40)) + 0);
-                xsUser.setCurrentRouletteCount(0);
-                xsUser.setMaxRouletteCount(1);
-                xsUser.setCurrentRouletteCheck(0);
-                xsUser.setMaxRouletteCheck(50+randNum);
-                xsUser.setRouletteUpdateCount(0);
-                xsUser.setRouletteMaxUpdateCount((int) (xsUser.getMaxRouletteCheck()/2.5));
+            if (e.getRawSlot() < e.getView().getTopInventory().getSize()) {
+                XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
 
-                if(!XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
-                    XSHandlers.XSRoullete.getPlayerStartRoulette().add(p);
-                    p.sendMessage("Play...");
+                if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.close.slots").contains(String.valueOf(e.getSlot()))) {
+                    p.closeInventory();
+                    return;
+                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.red_item.slots").contains(String.valueOf(e.getSlot()))) {
+                    xsUser.setRouletteType(RouletteType.RED);
+                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.black_item.slots").contains(String.valueOf(e.getSlot()))) {
+                    xsUser.setRouletteType(RouletteType.BLACK);
+                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.green_item.slots").contains(String.valueOf(e.getSlot()))) {
+                    xsUser.setRouletteType(RouletteType.GREEN);
+                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.play.slots").contains(String.valueOf(e.getSlot()))) {
+
+                    if(!xsUser.getRouletteType().equals(RouletteType.NONE)) {
+
+                        boolean isTokenEmpty = true;
+
+                        for(String slot : XSHandlers.XSRoullete.getCustomConfig().getStringList("module_configuration.tokenSlot.slots")) {
+                            if(e.getView().getItem(Integer.parseInt(slot)) != null) {
+                                isTokenEmpty = false;
+                                XSHandlers.XSRoullete.getXsRouletteOpenUI().get(p.getUniqueId()).setItem(Integer.parseInt(slot),new ItemStack(Material.AIR));
+                            }
+                        }
+
+                        if(!isTokenEmpty) {
+
+                            if(!XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
+                                int randNum = (int) ((Math.random() * (40)) + 0);
+                                xsUser.setCurrentRouletteCount(0);
+                                xsUser.setMaxRouletteCount(1);
+                                xsUser.setCurrentRouletteCheck(0);
+                                xsUser.setMaxRouletteCheck(50+randNum);
+                                xsUser.setRouletteUpdateCount(0);
+                                xsUser.setRouletteMaxUpdateCount((int) (xsUser.getMaxRouletteCheck()/2.5));
+
+                                XSHandlers.XSRoullete.getPlayerStartRoulette().add(p);
+                                p.sendMessage("Play...");
+                            } else {
+                                p.sendMessage("You currently play!");
+                            }
+                        } else {
+                            p.sendMessage("Token Must not empty!");
+                        }
+
+                    } else {
+                        p.sendMessage("Please Select Color");
+                    }
+
+
+                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("module_configuration.tokenSlot.slots").contains(String.valueOf(e.getSlot()))) {
+                    return;
+                }
+                updateInventory(p);
+                e.setCancelled(true);
+            } else {
+
+                ItemStack it = e.getCurrentItem();
+
+                boolean isContain = false;
+
+                for(Map.Entry<String,ItemStack> tokens : token.getTokenList().entrySet()) {
+                    ItemStack token = tokens.getValue();
+                    if(it.getType().equals(token.getType())) {
+                        if((token.hasItemMeta() && it.hasItemMeta()) || (!token.hasItemMeta() && !it.hasItemMeta())) {
+
+                            if(token.hasItemMeta()) {
+                                if(token.getItemMeta().hasDisplayName() && it.getItemMeta().hasDisplayName()) {
+                                    if(token.getItemMeta().getDisplayName().equalsIgnoreCase(it.getItemMeta().getDisplayName())) { //Contain
+                                        isContain = true;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                isContain = true;
+                                break;
+                            }
+                        }
+                    }
                 }
 
+                if(!isContain) {
+                    e.setCancelled(true);
+                }
 
             }
-
-            updateInventory(p);
-            e.setCancelled(true);
 
 
         }
@@ -158,9 +221,29 @@ public class ui_module_roulette implements Listener {
         Player p = (Player) e.getPlayer();
 
         if(e.getView().getTitle().equalsIgnoreCase(XSHandlers.XSRoullete.getTitle())) {
-            if (XSHandlers.XSRoullete.getXsRouletteOpenUI().containsKey(p.getUniqueId())) {
-                XSHandlers.XSRoullete.getXsRouletteOpenUI().remove(p.getUniqueId());
+
+            if(XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(XSCasino.getPlugin(), new Runnable() {
+                    @Override
+                    public void run() {
+                        p.sendMessage("Reopen...");
+                        p.openInventory(XSHandlers.XSRoullete.getXsRouletteOpenUI().get(p.getUniqueId()));
+                    }
+                }, 2L);
+            } else {
+                p.sendMessage("Close...");
+                if (XSHandlers.XSRoullete.getXsRouletteOpenUI().containsKey(p.getUniqueId())) {
+
+                    for(String slot : XSHandlers.XSRoullete.getCustomConfig().getStringList("module_configuration.tokenSlot.slots")) {
+                        if(e.getInventory().getItem(Integer.parseInt(slot)) != null) {
+                            p.getInventory().addItem(e.getInventory().getItem(Integer.parseInt(slot)));
+                        }
+                    }
+
+                    XSHandlers.XSRoullete.getXsRouletteOpenUI().remove(p.getUniqueId());
+                }
             }
+
         }
     }
 }

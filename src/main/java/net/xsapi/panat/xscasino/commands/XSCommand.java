@@ -2,11 +2,13 @@ package net.xsapi.panat.xscasino.commands;
 
 import net.xsapi.panat.xscasino.gui.ui_module_roulette;
 import net.xsapi.panat.xscasino.modules.token;
+import net.xsapi.panat.xscasino.types.RouletteType;
 import net.xsapi.panat.xscasino.types.TokenType;
 import net.xsapi.panat.xscasino.gui.ui_main_lottery;
 import net.xsapi.panat.xscasino.gui.ui_main_token;
 import net.xsapi.panat.xscasino.handlers.XSHandlers;
 import net.xsapi.panat.xscasino.handlers.XSUtils;
+import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -65,12 +67,14 @@ public class XSCommand implements CommandExecutor {
                             XSUtils.sendReplaceComponents(sender,str);
                         }
                         return true;
-                    } else if(args[0].equalsIgnoreCase("roulete")) {
-                        if(!sender.hasPermission("xsapi.xscasino.roulete")) {
+                    } else if(args[0].equalsIgnoreCase("roulette")) {
+                        if(!sender.hasPermission("xsapi.xscasino.roulette")) {
 
                             XSUtils.sendMessages(sender,"no_permission");
                             return false;
                         }
+                        XSUser xsUser = XSHandlers.xsCasinoUser.get(sender.getUniqueId());
+                        xsUser.setRouletteType(RouletteType.NONE);
                         ui_module_roulette.openRoulette(sender);
                         return true;
                     }

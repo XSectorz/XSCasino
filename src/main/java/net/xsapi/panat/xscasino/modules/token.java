@@ -62,6 +62,10 @@ public class token {
         }
     }
 
+    public static HashMap<String, ItemStack> getTokenList() {
+        return tokenList;
+    }
+
     public static void saveData() {
         if(XSHandlers.getUsingSQL()) {
             saveData("token_100");
