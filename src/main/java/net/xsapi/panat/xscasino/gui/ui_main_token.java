@@ -143,7 +143,7 @@ public class ui_main_token implements Listener {
                                     }
                                     XSHandlers.getEconomy().withdrawPlayer(p,(double) price);
 
-                                    Bukkit.broadcastMessage("Token" + it.getItemMeta().getDisplayName());
+                                  //  Bukkit.broadcastMessage("Token" + it.getItemMeta().getDisplayName());
 
                                     it.setAmount(amount);
                                     p.getInventory().addItem(it);
@@ -151,6 +151,7 @@ public class ui_main_token implements Listener {
                                 } else if(clickType.equals(ClickType.RIGHT)) {
 
                                     int have = 0;
+                                    int needTosell = amount;
                                     for(ItemStack itemCheck : p.getInventory().getContents()) {
                                         if(itemCheck == null || itemCheck.getType().equals(Material.AIR)) {
                                             continue;
@@ -188,6 +189,9 @@ public class ui_main_token implements Listener {
                                             }
                                         }
                                     }
+
+                                    long price = (long) (needTosell*(basePrice*0.95));
+                                    XSHandlers.getEconomy().depositPlayer(p,(double) price);
 
                                     XSUtils.sendMessages(p,"token_sell_success");
 
