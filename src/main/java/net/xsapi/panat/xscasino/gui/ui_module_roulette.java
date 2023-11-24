@@ -19,6 +19,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -130,6 +131,7 @@ public class ui_module_roulette implements Listener {
 
                 if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.close.slots").contains(String.valueOf(e.getSlot()))) {
                     p.closeInventory();
+                    e.setCancelled(true);
                     return;
                 } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.red_item.slots").contains(String.valueOf(e.getSlot()))) {
                     xsUser.setRouletteType(RouletteType.RED);
@@ -139,20 +141,53 @@ public class ui_module_roulette implements Listener {
                     xsUser.setRouletteType(RouletteType.GREEN);
                 } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.play.slots").contains(String.valueOf(e.getSlot()))) {
 
-                    if(!xsUser.getRouletteType().equals(RouletteType.NONE)) {
-
-                        boolean isTokenEmpty = true;
-
-                        for(String slot : XSHandlers.XSRoullete.getCustomConfig().getStringList("module_configuration.tokenSlot.slots")) {
-                            if(e.getView().getItem(Integer.parseInt(slot)) != null) {
-                                isTokenEmpty = false;
-                                XSHandlers.XSRoullete.getXsRouletteOpenUI().get(p.getUniqueId()).setItem(Integer.parseInt(slot),new ItemStack(Material.AIR));
-                            }
+                    if(!XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
+                     /*   Bukkit.broadcastMessage("Check");
+                        for(Map.Entry<String,ItemStack> tokensL : token.getTokenList().entrySet()) {
+                            Bukkit.broadcastMessage("Key: " + tokensL.getKey() + " val: " + tokensL.getValue().getType());
                         }
+                        Bukkit.broadcastMessage("-------------");*/
 
-                        if(!isTokenEmpty) {
+                        if(!xsUser.getRouletteType().equals(RouletteType.NONE)) {
 
-                            if(!XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
+                            boolean isTokenEmpty = true;
+
+
+                            for(String slot : XSHandlers.XSRoullete.getCustomConfig().getStringList("module_configuration.tokenSlot.slots")) {
+                                if(e.getView().getItem(Integer.parseInt(slot)) != null) {
+                                    isTokenEmpty = false;
+                                    ItemStack it = XSHandlers.XSRoullete.getXsRouletteOpenUI().get(p.getUniqueId()).getItem(Integer.parseInt(slot));
+
+                                    for(Map.Entry<String,ItemStack> tokens : token.getTokenList().entrySet()) {
+                                        ItemStack token = tokens.getValue();
+                                        int amount = 0;
+                                        if(token.getType().equals(it.getType())) {
+                                            if(token.hasItemMeta() && it.hasItemMeta()) {
+                                                if(token.getItemMeta().hasDisplayName() && it.getItemMeta().hasDisplayName()) {
+                                                    if(token.getItemMeta().getDisplayName().equalsIgnoreCase(it.getItemMeta().getDisplayName())) {
+                                                        amount += it.getAmount();
+                                                    }
+                                                }
+                                            } else {
+                                                amount += it.getAmount();
+                                            }
+                                        }
+                                        if(xsUser.getUseToken().containsKey(tokens.getKey())) {
+                                            xsUser.getUseToken().replace(tokens.getKey(),xsUser.getUseToken().get(tokens.getKey())+amount);
+                                        } else {
+                                            xsUser.getUseToken().put(tokens.getKey(),amount);
+                                        }
+                                    }
+                                    XSHandlers.XSRoullete.getXsRouletteOpenUI().get(p.getUniqueId()).setItem(Integer.parseInt(slot),new ItemStack(Material.AIR));
+
+                                }
+                            }
+                       /* for(Map.Entry<String,Integer> listData : xsUser.getUseToken().entrySet()) {
+                            Bukkit.broadcastMessage("Token: " + listData.getKey() + " use : " + listData.getValue());
+                        }*/
+
+                            if(!isTokenEmpty) {
+
                                 int randNum = (int) ((Math.random() * (40)) + 0);
                                 xsUser.setCurrentRouletteCount(0);
                                 xsUser.setMaxRouletteCount(1);
@@ -160,26 +195,36 @@ public class ui_module_roulette implements Listener {
                                 xsUser.setMaxRouletteCheck(50+randNum);
                                 xsUser.setRouletteUpdateCount(0);
                                 xsUser.setRouletteMaxUpdateCount((int) (xsUser.getMaxRouletteCheck()/2.5));
+                              /*  Bukkit.broadcastMessage("Play");
+                                for(Map.Entry<String,ItemStack> tokensL : token.getTokenList().entrySet()) {
+                                    Bukkit.broadcastMessage("Key: " + tokensL.getKey() + " val: " + tokensL.getValue().getType());
+                                }
+                                Bukkit.broadcastMessage("-------------");*/
 
                                 XSHandlers.XSRoullete.getPlayerStartRoulette().add(p);
-                                p.sendMessage("Play...");
                             } else {
-                                p.sendMessage("You currently play!");
+                                XSUtils.sendMessages(p,"roulette_token_empty");
                             }
-                        } else {
-                            p.sendMessage("Token Must not empty!");
-                        }
 
+                        } else {
+                            XSUtils.sendMessages(p,"roulette_non_select");
+                        }
                     } else {
-                        p.sendMessage("Please Select Color");
+                        XSUtils.sendMessages(p,"roulette_current_play");
                     }
 
 
                 } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("module_configuration.tokenSlot.slots").contains(String.valueOf(e.getSlot()))) {
+                    /* Do noting */
                     return;
                 }
                 updateInventory(p);
                 e.setCancelled(true);
+               /* Bukkit.broadcastMessage("After Click Roulette");
+                for(Map.Entry<String,ItemStack> tokensL : token.getTokenList().entrySet()) {
+                    Bukkit.broadcastMessage("Key: " + tokensL.getKey() + " val: " + tokensL.getValue().getType());
+                }
+                Bukkit.broadcastMessage("-------------");*/
             } else {
 
                 ItemStack it = e.getCurrentItem();
@@ -187,14 +232,23 @@ public class ui_module_roulette implements Listener {
                 boolean isContain = false;
 
                 for(Map.Entry<String,ItemStack> tokens : token.getTokenList().entrySet()) {
+                    //Bukkit.broadcastMessage("------------------");
+                    //Bukkit.broadcastMessage("Check token " + tokens.getKey());
+                    //Bukkit.broadcastMessage("Token Value " + tokens.getValue());
                     ItemStack token = tokens.getValue();
+
                     if(it.getType().equals(token.getType())) {
                         if((token.hasItemMeta() && it.hasItemMeta()) || (!token.hasItemMeta() && !it.hasItemMeta())) {
-
+                            // Bukkit.broadcastMessage("Come meta same");
                             if(token.hasItemMeta()) {
+                                //    Bukkit.broadcastMessage("Have Meta");
                                 if(token.getItemMeta().hasDisplayName() && it.getItemMeta().hasDisplayName()) {
+                                    //        Bukkit.broadcastMessage("Have display");
+                                    //        Bukkit.broadcastMessage("TOken" + token.getItemMeta().getDisplayName());
+                                    //        Bukkit.broadcastMessage("IT" + it.getItemMeta().getDisplayName());
                                     if(token.getItemMeta().getDisplayName().equalsIgnoreCase(it.getItemMeta().getDisplayName())) { //Contain
                                         isContain = true;
+                                        //            Bukkit.broadcastMessage("Same");
                                         break;
                                     }
                                 }
@@ -205,7 +259,6 @@ public class ui_module_roulette implements Listener {
                         }
                     }
                 }
-
                 if(!isContain) {
                     e.setCancelled(true);
                 }
@@ -226,12 +279,12 @@ public class ui_module_roulette implements Listener {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(XSCasino.getPlugin(), new Runnable() {
                     @Override
                     public void run() {
-                        p.sendMessage("Reopen...");
-                        p.openInventory(XSHandlers.XSRoullete.getXsRouletteOpenUI().get(p.getUniqueId()));
+                        if(XSHandlers.XSRoullete.getXsRouletteOpenUI().containsKey(p.getUniqueId())) {
+                            p.openInventory(XSHandlers.XSRoullete.getXsRouletteOpenUI().get(p.getUniqueId()));
+                        }
                     }
                 }, 2L);
             } else {
-                p.sendMessage("Close...");
                 if (XSHandlers.XSRoullete.getXsRouletteOpenUI().containsKey(p.getUniqueId())) {
 
                     for(String slot : XSHandlers.XSRoullete.getCustomConfig().getStringList("module_configuration.tokenSlot.slots")) {

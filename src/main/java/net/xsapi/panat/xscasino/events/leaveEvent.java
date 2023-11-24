@@ -20,6 +20,10 @@ public class leaveEvent implements Listener {
             //XSHandlers.xsCasinoUser.remove(p.getUniqueId());
         }
 
+        if(XSHandlers.XSRoullete.getXsRouletteOpenUI().containsKey(p.getUniqueId())) {
+            XSHandlers.XSRoullete.getXsRouletteOpenUI().remove(p.getUniqueId());
+        }
+
         XSHandlers.getUserData().remove(p.getUniqueId());
     }
 }

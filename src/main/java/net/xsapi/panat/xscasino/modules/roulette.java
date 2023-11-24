@@ -65,9 +65,18 @@ public class roulette extends XSCasinoTemplates{
         Bukkit.getScheduler().scheduleSyncRepeatingTask(XSCasino.getPlugin(), new Runnable() {
             @Override
             public void run() {
+              /*  Bukkit.broadcastMessage("Task New Data");
+                for(Map.Entry<String,ItemStack> tokensL : token.getTokenList().entrySet()) {
+                    Bukkit.broadcastMessage("Key: " + tokensL.getKey() + " val: " + tokensL.getValue().getType());
+                }*/
                 Iterator<Player> iterator = getPlayerStartRoulette().iterator();
                 while (iterator.hasNext()) {
                     Player p = iterator.next();
+
+                    if(!p.isOnline()) {
+                        iterator.remove();
+                        continue;
+                    }
 
                     ArrayList<ItemStack> currentItemInventory = new ArrayList<>();
                     HashMap<Integer,ItemStack> newItemInventory = new HashMap<>();
@@ -108,24 +117,54 @@ public class roulette extends XSCasinoTemplates{
                     }
 
                     if(xsUser.getCurrentRouletteCheck() >= xsUser.getMaxRouletteCheck()) { //End
-                        p.sendMessage("Rand End" + newItemInventory.get(winIndex).getType());
+                        //p.sendMessage("Rand End" + newItemInventory.get(winIndex).getType());
 
-                        Material mat = Material.AIR;
+                        Material mat = Material.ACACIA_BOAT;
+
+                        int multiple = 0;
 
                         if(xsUser.getRouletteType().equals(RouletteType.RED)) {
                             mat = Material.RED_WOOL;
+                            multiple = 2;
                         } else if(xsUser.getRouletteType().equals(RouletteType.GREEN)) {
                             mat = Material.GREEN_WOOL;
+                            multiple = 20;
                         } else if(xsUser.getRouletteType().equals(RouletteType.BLACK)) {
                             mat = Material.BLACK_WOOL;
+                            multiple = 2;
                         }
 
                         if(newItemInventory.get(winIndex).getType().equals(mat)) {
+                          /*  Bukkit.broadcastMessage("-----------------");
+                            for(Map.Entry<String,Integer> listData : xsUser.getUseToken().entrySet()) {
+                                Bukkit.broadcastMessage("Token: " + listData.getKey() + " use : " + listData.getValue());
+                            }
+                            Bukkit.broadcastMessage("-----------------");*/
+
+                            for(Map.Entry<String,Integer> tokens : xsUser.getUseToken().entrySet()) {
+                                ItemStack tokenUse = token.getTokenList().get(tokens.getKey());
+
+                                tokenUse.setAmount(xsUser.getUseToken().get(tokens.getKey())*multiple);
+                               // p.sendMessage("Send : " + tokens.getKey() + " amt: " + tokenUse.getAmount());
+                                p.getInventory().addItem(tokenUse);
+
+                            }
+
                             p.playSound(p.getLocation(),Sound.ENTITY_PLAYER_LEVELUP,5f,2f);
+                            XSUtils.sendMessages(p,"roulette_win");
+
+                           /* for(Map.Entry<String,ItemStack> tokensL : token.getTokenList().entrySet()) {
+                                Bukkit.broadcastMessage("Key: " + tokensL.getKey() + " val: " + tokensL.getValue().getType());
+                            }*/
                         } else {
                             p.playSound(p.getLocation(),Sound.ENTITY_WITHER_DEATH,5f,2f);
-                        }
+                            XSUtils.sendMessages(p,"roulette_lose");
 
+                           /* for(Map.Entry<String,ItemStack> tokensL : token.getTokenList().entrySet()) {
+                                Bukkit.broadcastMessage("Key: " + tokensL.getKey() + " val: " + tokensL.getValue().getType());
+                            }*/
+                        }
+                        xsUser.getUseToken().clear();
                         iterator.remove();
                     }
 

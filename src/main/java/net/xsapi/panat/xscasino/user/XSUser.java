@@ -30,6 +30,7 @@ public class XSUser {
     public int maxRouletteCheck = 0;
     public int rouletteUpdateCount = 0;
     public int rouletteMaxUpdateCount = 0;
+    public HashMap<String,Integer> useToken = new HashMap<>();
 
     private File userFile;
     private FileConfiguration userConfig;
@@ -44,6 +45,10 @@ public class XSUser {
             this.userFile = new File(XSCasino.getPlugin().getDataFolder() + "/data", p.getUniqueId() + ".yml");
             this.userConfig = YamlConfiguration.loadConfiguration(this.userFile);
         }
+    }
+
+    public HashMap<String, Integer> getUseToken() {
+        return useToken;
     }
 
     public Player getPlayer() {

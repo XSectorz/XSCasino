@@ -16,54 +16,30 @@ import java.util.Map;
 
 public class token {
 
-    public static HashMap<String,ItemStack> tokenList = new HashMap<>();
+    public static HashMap<String,ItemStack> tokensList = new HashMap<>();
 
     private static String TABLE = "xscasino_token";
 
-    public static ItemStack getToken100() {
-        return tokenList.get("token_100");
-    }
-
-    public static ItemStack getToken1000() {
-        return tokenList.get("token_1000");
-    }
-
-    public static ItemStack getToken10000() {
-        return tokenList.get("token_10000");
-    }
-
-    public static void setToken100(ItemStack token100) {
-        tokenList.put("token_100",token100);
-    }
-
-    public static void setToken1000(ItemStack token1000) {
-        tokenList.put("token_1000",token1000);
-    }
-
-    public static void setToken10000(ItemStack token10000) {
-        tokenList.put("token_10000",token10000);
-    }
-
     public static void setupDefault() {
         if(XSHandlers.getUsingSQL()) {
-            token.setToken100(new ItemStack(Material.AIR));
-            token.setToken1000(new ItemStack(Material.AIR));
-            token.setToken10000(new ItemStack(Material.AIR));
+            token.getTokenList().put("token_100",new ItemStack(Material.GOLD_NUGGET));
+            token.getTokenList().put("token_1000",new ItemStack(Material.GOLD_NUGGET));
+            token.getTokenList().put("token_10000",new ItemStack(Material.GOLD_NUGGET));
             createSQL(XSHandlers.getJDBC_URL(),XSHandlers.getUSER(),XSHandlers.getPASS());
             loadSQLData();
         } else {
             if(tokenConfig.customConfig.get("items.token100") != null) {
-                setToken100(XSUtils.itemStackFromBase64(tokenConfig.customConfig.getString("items.token100")));
+                token.getTokenList().put("token_100",XSUtils.itemStackFromBase64(tokenConfig.customConfig.getString("items.token100")));
             } else if(tokenConfig.customConfig.get("items.token1000") != null) {
-                setToken1000(XSUtils.itemStackFromBase64(tokenConfig.customConfig.getString("items.token1000")));
+                token.getTokenList().put("token_100",XSUtils.itemStackFromBase64(tokenConfig.customConfig.getString("items.token1000")));
             } else if(tokenConfig.customConfig.get("items.token10000") != null) {
-                setToken10000(XSUtils.itemStackFromBase64(tokenConfig.customConfig.getString("items.token10000")));
+                token.getTokenList().put("token_100",XSUtils.itemStackFromBase64(tokenConfig.customConfig.getString("items.token10000")));
             }
         }
     }
 
     public static HashMap<String, ItemStack> getTokenList() {
-        return tokenList;
+        return tokensList;
     }
 
     public static void saveData() {
@@ -72,9 +48,9 @@ public class token {
             saveData("token_1000");
             saveData("token_10000");
         } else {
-            tokenConfig.customConfig.set("items.token100",XSUtils.itemStackToBase64(tokenList.get("token_100")));
-            tokenConfig.customConfig.set("items.token1000",XSUtils.itemStackToBase64(tokenList.get("token_1000")));
-            tokenConfig.customConfig.set("items.token10000",XSUtils.itemStackToBase64(tokenList.get("token_10000")));
+            tokenConfig.customConfig.set("items.token100",XSUtils.itemStackToBase64(getTokenList().get("token_100")));
+            tokenConfig.customConfig.set("items.token1000",XSUtils.itemStackToBase64(getTokenList().get("token_1000")));
+            tokenConfig.customConfig.set("items.token10000",XSUtils.itemStackToBase64(getTokenList().get("token_10000")));
 
             tokenConfig.save();
             tokenConfig.reload();
@@ -87,7 +63,10 @@ public class token {
             String updateQuery = "UPDATE " + TABLE + " SET encode = ? WHERE tokenID = ?";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
-                preparedStatement.setString(1, XSUtils.itemStackToBase64(tokenList.get(key)));
+
+               // Bukkit.broadcastMessage("Save : " + key + " Item: " + tokenList.get(key));
+
+                preparedStatement.setString(1, XSUtils.itemStackToBase64(getTokenList().get(key)));
                 preparedStatement.setString(2, key);
                 preparedStatement.executeUpdate();
             }
@@ -114,9 +93,9 @@ public class token {
                         String encoded = resultSet.getString("encode");
 
                         if(!encoded.isEmpty()) {
-                            tokenList.put(key,XSUtils.itemStackFromBase64(encoded));
+                            getTokenList().put(key,XSUtils.itemStackFromBase64(encoded));
                         }
-                       // Bukkit.broadcastMessage("UPDATE! " + key);
+                       //Bukkit.broadcastMessage("UPDATE! " + key + " with " + XSUtils.itemStackFromBase64(encoded));
                     }
                 }
             }

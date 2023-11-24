@@ -123,13 +123,13 @@ public class ui_main_token implements Listener {
                                 ItemStack it = null;
                                 switch (xsUser.getTokenType()) {
                                     case TOKEN_100:
-                                        it = token.getToken100();
+                                        it = token.getTokenList().get("token_100");
                                         break;
                                     case TOKEN_1000:
-                                        it = token.getToken1000();
+                                        it = token.getTokenList().get("token_1000");
                                         break;
                                     case TOKEN_10000:
-                                        it = token.getToken10000();
+                                        it = token.getTokenList().get("token_10000");
                                         break;
                                     default:
                                         break;
@@ -143,9 +143,11 @@ public class ui_main_token implements Listener {
                                     }
                                     XSHandlers.getEconomy().withdrawPlayer(p,(double) price);
 
+                                    Bukkit.broadcastMessage("Token" + it.getItemMeta().getDisplayName());
+
                                     it.setAmount(amount);
                                     p.getInventory().addItem(it);
-                                    p.sendMessage("Buy success!");
+                                    XSUtils.sendMessages(p,"token_buy_success");
                                 } else if(clickType.equals(ClickType.RIGHT)) {
 
                                     int have = 0;
@@ -163,7 +165,7 @@ public class ui_main_token implements Listener {
                                     }
 
                                     if(have < amount) {
-                                        Bukkit.broadcastMessage("Item not enough!");
+                                        XSUtils.sendMessages(p,"token_sell_not_enough");
                                         return null;
                                     }
 
@@ -187,7 +189,7 @@ public class ui_main_token implements Listener {
                                         }
                                     }
 
-                                    Bukkit.broadcastMessage("Sell successful: ");
+                                    XSUtils.sendMessages(p,"token_sell_success");
 
                                 }
 

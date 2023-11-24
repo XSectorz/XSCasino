@@ -10,11 +10,14 @@ import net.xsapi.panat.xscasino.handlers.XSHandlers;
 import net.xsapi.panat.xscasino.handlers.XSUtils;
 import net.xsapi.panat.xscasino.user.XSUser;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Map;
 
 public class XSCommand implements CommandExecutor {
     @Override
@@ -75,6 +78,7 @@ public class XSCommand implements CommandExecutor {
                         }
                         XSUser xsUser = XSHandlers.xsCasinoUser.get(sender.getUniqueId());
                         xsUser.setRouletteType(RouletteType.NONE);
+                        xsUser.getUseToken().clear();
                         ui_module_roulette.openRoulette(sender);
                         return true;
                     }
@@ -142,24 +146,27 @@ public class XSCommand implements CommandExecutor {
                             } else if(type.equalsIgnoreCase("10000")) {
                                 tokenType = TokenType.TOKEN_10000;
                             }
-                            ItemStack it = sender.getInventory().getItemInMainHand();
+                            ItemStack it = sender.getInventory().getItemInMainHand().clone();
 
                             switch (tokenType) {
                                 case TOKEN_100:
-                                    token.setToken100(it);
+                                    token.getTokenList().put("token_100",it);
                                     break;
                                 case TOKEN_1000:
-                                    token.setToken1000(it);
+                                    token.getTokenList().put("token_1000",it);
                                     break;
                                 case TOKEN_10000:
-                                    token.setToken10000(it);
+                                    token.getTokenList().put("token_10000",it);
                                     break;
                                 default:
                                     break;
 
                             }
 
-                            sender.sendMessage("Setup success");
+                            XSUtils.sendMessages(sender,"roulette_setItem");
+                            /*for(Map.Entry<String,ItemStack> tokensL : token.getTokenList().entrySet()) {
+                                Bukkit.broadcastMessage("Key: " + tokensL.getKey() + " val: " + tokensL.getValue().getType());
+                            }*/
                             return true;
 
                         }
