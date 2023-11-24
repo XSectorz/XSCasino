@@ -228,37 +228,41 @@ public class ui_module_roulette implements Listener {
             } else {
 
                 ItemStack it = e.getCurrentItem();
-
                 boolean isContain = false;
 
-                for(Map.Entry<String,ItemStack> tokens : token.getTokenList().entrySet()) {
-                    //Bukkit.broadcastMessage("------------------");
-                    //Bukkit.broadcastMessage("Check token " + tokens.getKey());
-                    //Bukkit.broadcastMessage("Token Value " + tokens.getValue());
-                    ItemStack token = tokens.getValue();
+                if(it == null) {
+                    isContain = true;
+                } else {
+                    for(Map.Entry<String,ItemStack> tokens : token.getTokenList().entrySet()) {
+                        //Bukkit.broadcastMessage("------------------");
+                        //Bukkit.broadcastMessage("Check token " + tokens.getKey());
+                        //Bukkit.broadcastMessage("Token Value " + tokens.getValue());
+                        ItemStack token = tokens.getValue();
 
-                    if(it.getType().equals(token.getType())) {
-                        if((token.hasItemMeta() && it.hasItemMeta()) || (!token.hasItemMeta() && !it.hasItemMeta())) {
-                            // Bukkit.broadcastMessage("Come meta same");
-                            if(token.hasItemMeta()) {
-                                //    Bukkit.broadcastMessage("Have Meta");
-                                if(token.getItemMeta().hasDisplayName() && it.getItemMeta().hasDisplayName()) {
-                                    //        Bukkit.broadcastMessage("Have display");
-                                    //        Bukkit.broadcastMessage("TOken" + token.getItemMeta().getDisplayName());
-                                    //        Bukkit.broadcastMessage("IT" + it.getItemMeta().getDisplayName());
-                                    if(token.getItemMeta().getDisplayName().equalsIgnoreCase(it.getItemMeta().getDisplayName())) { //Contain
-                                        isContain = true;
-                                        //            Bukkit.broadcastMessage("Same");
-                                        break;
+                        if(it.getType().equals(token.getType())) {
+                            if((token.hasItemMeta() && it.hasItemMeta()) || (!token.hasItemMeta() && !it.hasItemMeta())) {
+                                // Bukkit.broadcastMessage("Come meta same");
+                                if(token.hasItemMeta()) {
+                                    //    Bukkit.broadcastMessage("Have Meta");
+                                    if(token.getItemMeta().hasDisplayName() && it.getItemMeta().hasDisplayName()) {
+                                        //        Bukkit.broadcastMessage("Have display");
+                                        //        Bukkit.broadcastMessage("TOken" + token.getItemMeta().getDisplayName());
+                                        //        Bukkit.broadcastMessage("IT" + it.getItemMeta().getDisplayName());
+                                        if(token.getItemMeta().getDisplayName().equalsIgnoreCase(it.getItemMeta().getDisplayName())) { //Contain
+                                            isContain = true;
+                                            //            Bukkit.broadcastMessage("Same");
+                                            break;
+                                        }
                                     }
+                                } else {
+                                    isContain = true;
+                                    break;
                                 }
-                            } else {
-                                isContain = true;
-                                break;
                             }
                         }
                     }
                 }
+
                 if(!isContain) {
                     e.setCancelled(true);
                 }
