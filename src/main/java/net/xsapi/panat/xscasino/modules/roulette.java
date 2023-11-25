@@ -79,7 +79,6 @@ public class roulette extends XSCasinoTemplates{
                     }
 
                     ArrayList<ItemStack> currentItemInventory = new ArrayList<>();
-                    HashMap<Integer,ItemStack> newItemInventory = new HashMap<>();
 
                     XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
 
@@ -87,22 +86,26 @@ public class roulette extends XSCasinoTemplates{
                         currentItemInventory.add(XSHandlers.XSRoullete.getXsRouletteOpenUI().get(p.getUniqueId()).getItem(slot));
                     }
 
-                    for(int i = 1 ; i < listRandIndex.size()+1 ; i++) {
-                        if(i == listRandIndex.size()) {
-                            newItemInventory.put(listRandIndex.get(0),currentItemInventory.get(i-1));
-                        } else {
-                            newItemInventory.put(listRandIndex.get(i),currentItemInventory.get(i-1));
-                        }
-                    }
-
                     xsUser.setCurrentRouletteCount(xsUser.getCurrentRouletteCount()+1);
 
                     if(xsUser.getCurrentRouletteCount() >= xsUser.getMaxRouletteCount()) {
-                        //p.sendMessage("Update...");
+                       // p.sendMessage("Update... " + xsUser.getCurrentRouletteCount());
+
+                        for(int i = 1 ; i < listRandIndex.size()+1 ; i++) {
+                            if(i == listRandIndex.size()) {
+                                xsUser.getNewItemInventory().put(listRandIndex.get(0),currentItemInventory.get(i-1));
+                            } else {
+                                xsUser.getNewItemInventory().put(listRandIndex.get(i),currentItemInventory.get(i-1));
+                            }
+                        }
+
+                        if(!xsUser.isUpdateRouletteUI()) {
+                            xsUser.setCurrentRouletteCheck(xsUser.getCurrentRouletteCheck()+1);
+                            xsUser.setRouletteUpdateCount(xsUser.getRouletteUpdateCount()+1);
+                        }
                         xsUser.setCurrentRouletteCount(0);
-                        xsUser.setCurrentRouletteCheck(xsUser.getCurrentRouletteCheck()+1);
-                        xsUser.setRouletteUpdateCount(xsUser.getRouletteUpdateCount()+1);
-                        updateInventoryRoulette(p,newItemInventory);
+
+                        updateInventoryRoulette(p,xsUser.getNewItemInventory());
                         p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,5f,5f);
                     }
 
@@ -116,10 +119,11 @@ public class roulette extends XSCasinoTemplates{
                         }
                     }
 
-                    if(xsUser.getCurrentRouletteCheck() >= xsUser.getMaxRouletteCheck()) { //End
+                    if(xsUser.getCurrentRouletteCheck() >= xsUser.getMaxRouletteCheck() || xsUser.isUpdateRouletteUI()) { //End
                         //p.sendMessage("Rand End" + newItemInventory.get(winIndex).getType());
 
                         Material mat = Material.ACACIA_BOAT;
+                        Material predictWinMat = Material.ACACIA_BOAT;
 
                         int multiple = 0;
 
@@ -134,7 +138,23 @@ public class roulette extends XSCasinoTemplates{
                             multiple = 2;
                         }
 
-                        if(newItemInventory.get(winIndex).getType().equals(mat)) {
+                        if(xsUser.getPredictWinType().equals(RouletteType.RED)) {
+                            predictWinMat = Material.RED_WOOL;
+                        } else if(xsUser.getPredictWinType().equals(RouletteType.GREEN)) {
+                            predictWinMat = Material.GREEN_WOOL;
+                        } else if(xsUser.getPredictWinType().equals(RouletteType.BLACK)) {
+                            predictWinMat = Material.BLACK_WOOL;
+                        }
+
+                        if(!xsUser.getNewItemInventory().get(winIndex).getType().equals(predictWinMat)) {
+                            xsUser.setUpdateRouletteUI(true);
+                        //    Bukkit.broadcastMessage("Not Match Continue.. " + xsUser.getNewItemInventory().get(winIndex).getType() + " | " + predictWinMat);
+                            continue;
+                        }
+
+                   //     Bukkit.broadcastMessage("Match! Predict " + xsUser.getNewItemInventory().get(winIndex).getType() + " | " + predictWinMat);
+
+                        if(xsUser.getNewItemInventory().get(winIndex).getType().equals(mat)) {
                           /*  Bukkit.broadcastMessage("-----------------");
                             for(Map.Entry<String,Integer> listData : xsUser.getUseToken().entrySet()) {
                                 Bukkit.broadcastMessage("Token: " + listData.getKey() + " use : " + listData.getValue());

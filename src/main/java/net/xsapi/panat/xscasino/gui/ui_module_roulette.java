@@ -188,18 +188,46 @@ public class ui_module_roulette implements Listener {
 
                             if(!isTokenEmpty) {
 
-                                int randNum = (int) ((Math.random() * (40)) + 0);
+                                int randNum = (int) ((Math.random() * (10)) + 0);
                                 xsUser.setCurrentRouletteCount(0);
                                 xsUser.setMaxRouletteCount(1);
                                 xsUser.setCurrentRouletteCheck(0);
                                 xsUser.setMaxRouletteCheck(50+randNum);
                                 xsUser.setRouletteUpdateCount(0);
+                                xsUser.setUpdateRouletteUI(false);
+                                xsUser.getNewItemInventory().clear();
                                 xsUser.setRouletteMaxUpdateCount((int) (xsUser.getMaxRouletteCheck()/2.5));
                               /*  Bukkit.broadcastMessage("Play");
                                 for(Map.Entry<String,ItemStack> tokensL : token.getTokenList().entrySet()) {
                                     Bukkit.broadcastMessage("Key: " + tokensL.getKey() + " val: " + tokensL.getValue().getType());
                                 }
                                 Bukkit.broadcastMessage("-------------");*/
+
+                                double random = Math.random();
+                                //Bukkit.broadcastMessage("Rand: " + random);
+                                if(xsUser.getRouletteType().equals(RouletteType.RED)) {
+
+                                    if(random < 0.25) { //Red
+                                        xsUser.setPredictWinType(RouletteType.RED);
+                                    } else if(random < 0.99) { //Black
+                                        xsUser.setPredictWinType(RouletteType.BLACK);
+                                    } else { //Green
+                                        xsUser.setPredictWinType(RouletteType.GREEN);
+                                    }
+
+                                } else if(xsUser.getRouletteType().equals(RouletteType.BLACK) || xsUser.getRouletteType().equals(RouletteType.GREEN)) {
+
+                                    if(random < 0.25) {
+                                        xsUser.setPredictWinType(RouletteType.BLACK);
+                                    } else if(random < 0.99) {
+                                        xsUser.setPredictWinType(RouletteType.RED);
+                                    } else {
+                                        xsUser.setPredictWinType(RouletteType.GREEN);
+                                    }
+
+                                }
+                                //Bukkit.broadcastMessage("You select : " + xsUser.getRouletteType());
+                                //Bukkit.broadcastMessage("Your Win is : " + xsUser.getPredictWinType().toString());
 
                                 XSHandlers.XSRoullete.getPlayerStartRoulette().add(p);
                             } else {

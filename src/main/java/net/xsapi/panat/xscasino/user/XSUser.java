@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.sql.*;
@@ -30,6 +31,9 @@ public class XSUser {
     public int maxRouletteCheck = 0;
     public int rouletteUpdateCount = 0;
     public int rouletteMaxUpdateCount = 0;
+    public HashMap<Integer, ItemStack> newItemInventory = new HashMap<>();
+    public RouletteType predictWinType = RouletteType.NONE;
+    public boolean updateRouletteUI = false;
     public HashMap<String,Integer> useToken = new HashMap<>();
 
     private File userFile;
@@ -47,8 +51,28 @@ public class XSUser {
         }
     }
 
+    public HashMap<Integer, ItemStack> getNewItemInventory() {
+        return newItemInventory;
+    }
+
+    public boolean isUpdateRouletteUI() {
+        return updateRouletteUI;
+    }
+
+    public void setUpdateRouletteUI(boolean updateRouletteUI) {
+        this.updateRouletteUI = updateRouletteUI;
+    }
+
     public HashMap<String, Integer> getUseToken() {
         return useToken;
+    }
+
+    public RouletteType getPredictWinType() {
+        return predictWinType;
+    }
+
+    public void setPredictWinType(RouletteType predictWinType) {
+        this.predictWinType = predictWinType;
     }
 
     public Player getPlayer() {

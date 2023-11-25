@@ -78,6 +78,9 @@ public class XSCommand implements CommandExecutor {
                         }
                         XSUser xsUser = XSHandlers.xsCasinoUser.get(sender.getUniqueId());
                         xsUser.setRouletteType(RouletteType.NONE);
+                        xsUser.setPredictWinType(RouletteType.NONE);
+                        xsUser.setUpdateRouletteUI(false);
+                        xsUser.getNewItemInventory().clear();
                         xsUser.getUseToken().clear();
                         ui_module_roulette.openRoulette(sender);
                         return true;
