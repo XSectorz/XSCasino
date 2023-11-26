@@ -162,7 +162,7 @@ public class roulette extends XSCasinoTemplates{
                             Bukkit.broadcastMessage("-----------------");*/
 
                             for(Map.Entry<String,Integer> tokens : xsUser.getUseToken().entrySet()) {
-                                ItemStack tokenUse = token.getTokenList().get(tokens.getKey());
+                                ItemStack tokenUse = XSUtils.itemStackFromBase64(token.getTokenList().get(tokens.getKey()));
 
                                 tokenUse.setAmount(xsUser.getUseToken().get(tokens.getKey())*multiple);
                                // p.sendMessage("Send : " + tokens.getKey() + " amt: " + tokenUse.getAmount());

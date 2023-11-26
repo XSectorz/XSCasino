@@ -129,16 +129,19 @@ public class ui_module_roulette implements Listener {
             if (e.getRawSlot() < e.getView().getTopInventory().getSize()) {
                 XSUser xsUser = XSHandlers.xsCasinoUser.get(p.getUniqueId());
 
-                if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.close.slots").contains(String.valueOf(e.getSlot()))) {
+                if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.close.slots").contains(String.valueOf(e.getSlot())) && !XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
                     p.closeInventory();
                     e.setCancelled(true);
                     return;
-                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.red_item.slots").contains(String.valueOf(e.getSlot()))) {
+                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.red_item.slots").contains(String.valueOf(e.getSlot())) && !XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
                     xsUser.setRouletteType(RouletteType.RED);
-                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.black_item.slots").contains(String.valueOf(e.getSlot()))) {
+                    updateInventory(p);
+                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.black_item.slots").contains(String.valueOf(e.getSlot())) && !XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
                     xsUser.setRouletteType(RouletteType.BLACK);
-                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.green_item.slots").contains(String.valueOf(e.getSlot()))) {
+                    updateInventory(p);
+                } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.green_item.slots").contains(String.valueOf(e.getSlot())) && !XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
                     xsUser.setRouletteType(RouletteType.GREEN);
+                    updateInventory(p);
                 } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("contents.play.slots").contains(String.valueOf(e.getSlot()))) {
 
                     if(!XSHandlers.XSRoullete.getPlayerStartRoulette().contains(p)) {
@@ -158,8 +161,8 @@ public class ui_module_roulette implements Listener {
                                     isTokenEmpty = false;
                                     ItemStack it = XSHandlers.XSRoullete.getXsRouletteOpenUI().get(p.getUniqueId()).getItem(Integer.parseInt(slot));
 
-                                    for(Map.Entry<String,ItemStack> tokens : token.getTokenList().entrySet()) {
-                                        ItemStack token = tokens.getValue();
+                                    for(Map.Entry<String,String> tokens : token.getTokenList().entrySet()) {
+                                        ItemStack token = XSUtils.itemStackFromBase64(tokens.getValue());
                                         int amount = 0;
                                         if(token.getType().equals(it.getType())) {
                                             if(token.hasItemMeta() && it.hasItemMeta()) {
@@ -241,12 +244,11 @@ public class ui_module_roulette implements Listener {
                         XSUtils.sendMessages(p,"roulette_current_play");
                     }
 
-
+                    updateInventory(p);
                 } else if(XSHandlers.XSRoullete.getCustomConfig().getStringList("module_configuration.tokenSlot.slots").contains(String.valueOf(e.getSlot()))) {
                     /* Do noting */
                     return;
                 }
-                updateInventory(p);
                 e.setCancelled(true);
                /* Bukkit.broadcastMessage("After Click Roulette");
                 for(Map.Entry<String,ItemStack> tokensL : token.getTokenList().entrySet()) {
@@ -261,11 +263,8 @@ public class ui_module_roulette implements Listener {
                 if(it == null) {
                     isContain = true;
                 } else {
-                    for(Map.Entry<String,ItemStack> tokens : token.getTokenList().entrySet()) {
-                        //Bukkit.broadcastMessage("------------------");
-                        //Bukkit.broadcastMessage("Check token " + tokens.getKey());
-                        //Bukkit.broadcastMessage("Token Value " + tokens.getValue());
-                        ItemStack token = tokens.getValue();
+                    for(Map.Entry<String,String> tokens : token.getTokenList().entrySet()) {
+                        ItemStack token = XSUtils.itemStackFromBase64(tokens.getValue());
 
                         if(it.getType().equals(token.getType())) {
                             if((token.hasItemMeta() && it.hasItemMeta()) || (!token.hasItemMeta() && !it.hasItemMeta())) {

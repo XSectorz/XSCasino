@@ -123,13 +123,13 @@ public class ui_main_token implements Listener {
                                 ItemStack it = null;
                                 switch (xsUser.getTokenType()) {
                                     case TOKEN_100:
-                                        it = token.getTokenList().get("token_100");
+                                        it = XSUtils.itemStackFromBase64(token.getTokenList().get("token_100"));
                                         break;
                                     case TOKEN_1000:
-                                        it = token.getTokenList().get("token_1000");
+                                        it = XSUtils.itemStackFromBase64(token.getTokenList().get("token_1000"));
                                         break;
                                     case TOKEN_10000:
-                                        it = token.getTokenList().get("token_10000");
+                                        it = XSUtils.itemStackFromBase64(token.getTokenList().get("token_10000"));
                                         break;
                                     default:
                                         break;
@@ -190,7 +190,7 @@ public class ui_main_token implements Listener {
                                         }
                                     }
 
-                                    long price = (long) (needTosell*(basePrice*0.95));
+                                    long price = (long) (needTosell*(basePrice*0.85));
                                     XSHandlers.getEconomy().depositPlayer(p,(double) price);
 
                                     XSUtils.sendMessages(p,"token_sell_success");

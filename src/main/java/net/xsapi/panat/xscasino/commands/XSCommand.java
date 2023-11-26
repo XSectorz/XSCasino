@@ -140,31 +140,18 @@ public class XSCommand implements CommandExecutor {
                         if(args[1].equalsIgnoreCase("setItem")) {
                             String type = args[2].toString();
 
-                            TokenType tokenType = null;
-
-                            if(type.equalsIgnoreCase("100")) {
-                                tokenType = TokenType.TOKEN_100;
-                            } else if(type.equalsIgnoreCase("1000")) {
-                                tokenType = TokenType.TOKEN_1000;
-                            } else if(type.equalsIgnoreCase("10000")) {
-                                tokenType = TokenType.TOKEN_10000;
-                            }
                             ItemStack it = sender.getInventory().getItemInMainHand().clone();
 
-                            switch (tokenType) {
-                                case TOKEN_100:
-                                    token.getTokenList().put("token_100",it);
-                                    break;
-                                case TOKEN_1000:
-                                    token.getTokenList().put("token_1000",it);
-                                    break;
-                                case TOKEN_10000:
-                                    token.getTokenList().put("token_10000",it);
-                                    break;
-                                default:
-                                    break;
+                            String itString = XSUtils.itemStackToBase64(it);
 
+                            if(type.equalsIgnoreCase("100")) {
+                                token.getTokenList().put("token_100",itString);
+                            } else if(type.equalsIgnoreCase("1000")) {
+                                token.getTokenList().put("token_1000",itString);
+                            } else if(type.equalsIgnoreCase("10000")) {
+                                token.getTokenList().put("token_10000",itString);
                             }
+
 
                             XSUtils.sendMessages(sender,"roulette_setItem");
                             /*for(Map.Entry<String,ItemStack> tokensL : token.getTokenList().entrySet()) {
